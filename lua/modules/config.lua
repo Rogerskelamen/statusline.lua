@@ -4,7 +4,7 @@ local _config = {}
 local function get_defaults()
 	return {
 		match_colorscheme = false,
-		tabline = false,
+		tabline = true,
 		lsp_diagnostics = true,
 		ale_diagnostics = false,
 	}
