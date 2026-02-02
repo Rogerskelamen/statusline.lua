@@ -1,35 +1,30 @@
+---@class StatuslineConfig
+---@field match_colorscheme boolean
+---@field tabline boolean
+---@field lsp_diagnostics boolean
+---@field ale_diagnostics boolean
+
 local M = {}
-local _config = {}
 
-local function get_defaults()
-	return {
-		match_colorscheme = false,
-		tabline = true,
-		lsp_diagnostics = true,
-		ale_diagnostics = false,
-	}
-end
+---@type StatuslineConfig
+local defaults = {
+  match_colorscheme = false,
+  tabline = true,
+  lsp_diagnostics = true,
+  ale_diagnostics = false,
+}
 
-local function merge(defaults, user_config)
-	if user_config and type(user_config) == 'table' then
-		user_config = vim.tbl_deep_extend('force', defaults, user_config)
-	end
-	return user_config
-end
+---@type StatuslineConfig
+local _config = vim.deepcopy(defaults)
 
-function M.set(user_config)
-	user_config = user_config or {}
-	local defaults = get_defaults()
-	_config = merge(defaults, user_config)
-	return _config
-end
-
-function M.get()
-	return _config
-end
-
+---@param user_config? StatuslineConfig
 function M.setup(user_config)
-	M.set(user_config)
+  _config = vim.tbl_deep_extend("force", vim.deepcopy(defaults), user_config or {})
+end
+
+---@return StatuslineConfig
+function M.get()
+  return _config
 end
 
 return M
