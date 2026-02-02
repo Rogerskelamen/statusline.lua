@@ -12,7 +12,7 @@ function M.get_file_icon(bufnr)
 		icon = '' .. space
 		return icon
 	end
-	icon = devicons.deviconTable[file_name]
+	icon = devicons.devicon_table[file_name]
 	if icon ~= nil then
 		return icon .. space
 	else

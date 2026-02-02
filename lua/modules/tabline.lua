@@ -40,7 +40,7 @@ local getTabLabel = function(n)
   if file_name == "" then
     return "No Name"
   end
-  local icon = icons.deviconTable[file_name]
+  local icon = icons.devicon_table[file_name]
   if icon then
     return icon .. space .. file_name
   end
