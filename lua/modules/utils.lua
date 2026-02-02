@@ -1,24 +1,19 @@
-local api = vim.api
+local uv = vim.uv or vim.loop
 
-local utils = {}
+local M = {}
 
--- returns nil if not exists
-function utils.is_dir(filepath)
-	local ok, _ = os.rename(filepath, filepath)
-	return ok
+---@param path string
+---@return boolean
+function M.is_dir(path)
+  local stat = uv.fs_stat(path)
+  return stat and stat.type == "directory" or false
 end
 
-utils.Exists = function(variable)
-	local loaded = api.nvim_call_function('exists', { variable })
-	return loaded ~= 0
+---For example: utils.has_version(9) -> >=0.9?
+---@param minor integer
+---@return boolean
+function M.has_version(minor)
+  return vim.version().minor >= minor
 end
 
-utils.Call = function(arg0, arg1)
-	return api.nvim_call_function(arg0, arg1)
-end
-
-utils.IsVersion5 = function()
-	return api.nvim_call_function('has', { 'nvim-0.5' }) == 1
-end
-
-return utils
+return M

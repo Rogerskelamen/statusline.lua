@@ -1,12 +1,12 @@
-local utils = require('modules.utils')
-local M = {}
+--
 -- neoclide/coc.nvim
+--
+
+local M = {}
+
 function M.cocStatus()
-	local cocstatus = ''
-	if vim.fn.exists('*coc#status') == 0 then
-		return ''
-	end
-	cocstatus = utils.Call('coc#status', {})
-	return cocstatus
+  local ok, status = pcall(vim.fn["coc#status"])
+  return ok and status or ""
 end
+
 return M
