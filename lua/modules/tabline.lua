@@ -4,9 +4,10 @@
 local M = {}
 
 local api = vim.api
-local cmd = api.nvim_command
+local uv = vim.uv or vim.loop
 local icons = require("tables._icons")
 local config = require("modules.config")
+local colors = require("modules.colors")
 
 -- Separators
 local left_separator = ""
@@ -17,7 +18,7 @@ local space = " "
 ---@param dir string
 ---@return string
 local TrimmedDirectory = function(dir)
-  local home = vim.uv.os_homedir()
+  local home = uv.os_homedir()
   if vim.startswith(dir, home) and #dir ~= #home then
     if #dir > 30 then
       dir = ".." .. dir:sub(30)
@@ -49,18 +50,32 @@ end
 
 local set_colours = function()
   ---@type ColorScheme
-  local colors = require("modules.colors").get()
-  cmd("hi TabLineSel gui=Bold guibg=" .. colors.green .. " guifg=" .. colors.black_fg)
-  cmd("hi TabLineSelSeparator gui=bold guifg=" .. colors.green)
-  cmd("hi TabLine guibg=" .. colors.inactive_bg .. " guifg=" .. colors.white_fg .. " gui=None")
-  cmd("hi TabLineSeparator guifg=" .. colors.inactive_bg)
-  cmd("hi TabLineFill guibg=None gui=None")
+  local c = colors.get()
+
+  ---@type table<string, vim.api.keyset.highlight>
+  local tabline_hls = {
+    TabLineSel          = { fg = c.black_fg,   bg = c.green,      bold = true },
+    TabLineSelSeparator = { fg = c.green,                         bold = true },
+    TabLine             = { fg = c.white_fg,   bg = c.inactive_bg             },
+    TabLineSeparator    = { fg = c.inactive_bg                                },
+    TabLineFill         = {                    bg = "none"                    },
+  }
+
+  ---@param name string
+  ---@param override vim.api.keyset.highlight
+  ---@return vim.api.keyset.highlight
+  local function inherit(name, override)
+    local base = api.nvim_get_hl(0, { name = name, link = false })
+    return vim.tbl_extend("force", base, override)
+  end
+
+  for hl_name, opts in pairs(tabline_hls) do
+    api.nvim_set_hl(0, hl_name, inherit(hl_name, opts))
+  end
 end
 
 function M.init()
-  if not config.get().tabline then
-    return ""
-  end
+  if not config.get().tabline then return "" end
 
   set_colours()
   local tabline = ""

@@ -43,6 +43,10 @@ local defaults = {
 ---@type ColorScheme|nil
 local colors
 
+---@param group string
+---@param key string
+---@param fallback string
+---@return string
 local function get_color(group, key, fallback)
   local ok, hl = pcall(vim.nvim_get_hl, group, true)
   if not ok or not config.get().match_colorscheme then
