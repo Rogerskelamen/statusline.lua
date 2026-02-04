@@ -76,7 +76,7 @@ function M.activeLine()
 		.. '%#ModeSeparator#'
 		.. left_separator
 		.. '%#Mode# '
-		.. modes.current_mode[mode]
+		.. modes.current_mode(mode)
 		.. ' %#ModeSeparator#'
 		.. right_separator
 		.. space
