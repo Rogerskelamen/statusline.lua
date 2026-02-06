@@ -69,7 +69,7 @@ end
 function M.activeLine()
 	local statusline = ''
 	-- Component: Mode
-	local mode = vim.api.nvim_get_mode()['mode']
+	local mode = vim.api.nvim_get_mode().mode
 	set_mode_colours(mode)
 	statusline = statusline .. '%#ModeSeparator#' .. space
 	statusline = statusline

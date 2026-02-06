@@ -33,15 +33,18 @@ local mode_map = {
   t  = "T",
 }
 
-function M.current_mode(mode)
-  if mode_map[mode] then
-    return mode_map[mode]
-  end
+-- key sort: longer key has high priority
+local sorted = vim.tbl_keys(mode_map)
+table.sort(sorted, function(a, b) return #a > #b end)
 
-  -- prefix pair
-  for k, v in pairs(mode_map) do
+---Map current mode to a certain prompt
+---@param mode string
+---@return string
+function M.current_mode(mode)
+  -- longest prefix pair
+  for _, k in ipairs(sorted) do
     if mode:sub(1, #k) == k then
-      return v
+      return mode_map[k]
     end
   end
 
