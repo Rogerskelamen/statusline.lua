@@ -5,96 +5,71 @@
  ___/ /  / /     / ___ | / /    / /_/ /   ___/ /  / /___ _/ /    / /|  /   / /___
 /____/  /_/     /_/  |_|/_/     \____/   /____/  /_____//___/   /_/ |_/   /_____/
 --]]
-------------------------------------------------------------------------
---                             Variables                              --
-------------------------------------------------------------------------
 
 local config = require("modules.config")
-local statusline = require("modules.statusline")
-local tabline = require("modules.tabline")
+local status_mod = require("modules.statusline")
+
 local M = {}
 
----@type integer
-local statusline_group = vim.api.nvim_create_augroup("StatuslineGroup", { clear = true })
+-- 局部状态，替代全局变量
+local state = {
+  diag_lsp = false,
+  diag_ale = false,
+}
 
-------------------------------------------------------------------------
---                              Init                                  --
-------------------------------------------------------------------------
----Setup for statusline
----@param user_config StatuslineConfig
+-- ====== 现代 render 入口 ======
+function M.render()
+  local ft = vim.bo.filetype
+
+  if ft == "NvimTree" then
+    return status_mod.simpleLine()
+  end
+
+  if state.diag_lsp then
+    return status_mod.activeLine(true, false)
+  elseif state.diag_ale then
+    return status_mod.activeLine(false, true)
+  else
+    return status_mod.activeLine(false, false)
+  end
+end
+
+-- ====== setup ======
 function M.setup(user_config)
   config.setup(user_config)
-  statusline.set_highlights()
+  vim.o.ruler = false --disable line numbers in bottom right for our custom indicator as above
+
+  -- 只设置一次高亮
+  status_mod.set_highlights()
 
   vim.api.nvim_create_autocmd("ColorScheme", {
-    group = statusline_group,
     callback = function()
-      statusline.set_highlights()
+      status_mod.set_highlights()
+      require("modules.tabline").set_colours()
     end,
   })
 
-  vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
-    group = statusline_group,
-    callback = function()
-      M.activeLine()
-    end,
-  })
+  -- 暴露 render
+  _G.Statusline = M
+  vim.o.statusline = "%{%v:lua.Statusline.render()%}"
 
-  vim.api.nvim_create_autocmd({ "WinLeave", "BufLeave" }, {
-    group = statusline_group,
-    callback = function()
-      M.inActiveLine()
-    end,
-  })
-
-  vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "WinLeave", "BufLeave" }, {
-    group = statusline_group,
-    pattern = "NvimTree",
-    callback = function()
-      M.simpleLine()
-    end,
-  })
-
-  vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
-    group = statusline_group,
-    callback = function()
-      M.tabline_init()
-    end,
-  })
-end
-
-------------------------------------------------------------------------
---                              Statusline                            --
-------------------------------------------------------------------------
-function M.activeLine()
-  if config.get().lsp_diagnostics == true then
-    vim.wo.statusline = "%!v:lua.require'modules.statusline'.wants_lsp()"
-  elseif config.get().ale_diagnostics == true then
-    vim.wo.statusline = "%!v:lua.require'modules.statusline'.wants_ale()"
-  else
-    vim.wo.statusline = "%!v:lua.require'modules.statusline'.activeLine()"
+  -- tabline 原逻辑保留
+  if config.get().tabline then
+    _G.Tabline = require("modules.tabline")
+    vim.o.tabline = "%{%v:lua.Tabline.render()%}"
   end
 end
 
-function M.simpleLine()
-  vim.wo.statusline = statusline.simpleLine()
+-- 给外部调用的接口（代替 wants_lsp/ale）
+function M.use_lsp()
+  state.diag_lsp = true
+  state.diag_ale = false
 end
 
-------------------------------------------------------------------------
---                              Inactive                              --
-------------------------------------------------------------------------
-
-function M.inActiveLine()
-  vim.wo.statusline = statusline.inActiveLine()
-end
-
-------------------------------------------------------------------------
---                        Tabline Config                              --
-------------------------------------------------------------------------
-M.tabline_init = function()
-  if config.get().tabline == true then
-    vim.o.tabline = tabline.init()
-  end
+function M.use_ale()
+  state.diag_lsp = false
+  state.diag_ale = true
 end
 
 return M
+

@@ -32,8 +32,15 @@ local space = " "
 --                             Colours                                --
 ------------------------------------------------------------------------
 
+local last_mode = nil
+
 -- Redraw different colors for different mode
 local function set_mode_colours(mode)
+  if mode == last_mode then
+    return
+  end
+  last_mode = mode
+
   local colors = require("modules.colors").get()
   if mode == "n" then
     cmd("hi Mode guibg=" .. colors.green .. " guifg=" .. colors.black_fg .. " gui=bold")
@@ -66,7 +73,7 @@ end
 ------------------------------------------------------------------------
 --                              Statusline                            --
 ------------------------------------------------------------------------
-function M.activeLine()
+function M.activeLine(diag_lsp, diag_ale)
   local statusline = ""
   -- Component: Mode
   local mode = vim.api.nvim_get_mode().mode
@@ -123,18 +130,7 @@ function M.activeLine()
   -- Component: Modified, Read-Only, Filesize, Row/Col
   statusline = statusline .. "%#Status_Line#" .. bufmod.is_buffer_modified()
   statusline = statusline .. editable.editable() .. filesize.get_file_size() .. [[ʟ %l/%L c %c]] .. space
-  cmd("set noruler") --disable line numbers in bottom right for our custom indicator as above
   return statusline
-end
-
-function M.wants_lsp()
-  diag_lsp = true
-  return M.activeLine(diag_lsp)
-end
-
-function M.wants_ale()
-  diag_ale = true
-  return M.activeLine(diag_ale)
 end
 
 -- statusline for simple buffers such as NvimTree where you don't need mode indicators etc
@@ -154,3 +150,76 @@ function M.inActiveLine()
 end
 
 return M
+
+
+-- local function mode_group(mode)
+--   if mode:sub(1,1) == "n" then
+--     return "normal"
+--   elseif mode:sub(1,1) == "i" then
+--     return "insert"
+--   elseif mode:sub(1,1) == "v" or mode:sub(1, 1) == "V" or mode == "\22" then
+--     return "visual"
+--   elseif mode:sub(1,1) == "c" then
+--     return "command"
+--   elseif mode:sub(1,1) == "t" then
+--     return "terminal"
+--   else
+--     return "other"
+--   end
+-- end
+--
+-- ---@param mode string
+-- ---@return string
+-- ---@return string
+-- local function get_mode_hl(mode)
+--   local g = mode_group(mode)
+--
+--   if g == "normal" then
+--     return "SLModeNormal", "SLModeSepNormal"
+--   elseif g == "insert" then
+--     return "SLModeInsert", "SLModeSepInsert"
+--   elseif g == "visual" then
+--     return "SLModeVisual", "SLModeSepVisual"
+--   elseif g == "command" then
+--     return "SLModeCommand", "SLModeSepCommand"
+--   elseif g == "terminal" then
+--     return "SLModeTerm", "SLModeSepTerm"
+--   else
+--     return "SLModeNormal", "SLModeSepNormal"
+--   end
+-- end
+--
+-- function M.set_highlights()
+--   local c = require("modules.colors").get()
+--   local hi = vim.api.nvim_set_hl
+--
+--   cmd("hi StatusLine guibg=" .. c.statusline_bg .. " guifg=" .. c.statusline_fg)
+--   -- set Statusline_LSP_Func highlight
+--   cmd("hi Statusline_LSP_Func guibg=" .. c.statusline_bg .. " guifg=" .. c.statusline_fg)
+--   -- set InActive highlight
+--   cmd("hi InActive guibg=" .. c.inactive_bg .. " guifg=" .. c.white_fg)
+--
+--   hi(0, "SLNormal", { fg = c.statusline_fg, bg = c.statusline_bg })
+--   hi(0, "SLInactive", { fg = c.white_fg, bg = c.inactive_bg })
+--
+--   hi(0, "SLModeNormal",  { fg = c.black_fg, bg = c.green,  bold = true })
+--   hi(0, "SLModeInsert",  { fg = c.black_fg, bg = c.blue,   bold = true })
+--   hi(0, "SLModeVisual",  { fg = c.black_fg, bg = c.purple, bold = true })
+--   hi(0, "SLModeCommand", { fg = c.black_fg, bg = c.yellow, bold = true })
+--   hi(0, "SLModeTerm",    { fg = c.black_fg, bg = c.red,    bold = true })
+--
+--   hi(0, "SLModeSepNormal",  { fg = c.green })
+--   hi(0, "SLModeSepInsert",  { fg = c.blue })
+--   hi(0, "SLModeSepVisual",  { fg = c.purple })
+--   hi(0, "SLModeSepCommand", { fg = c.yellow })
+--   hi(0, "SLModeSepTerm",    { fg = c.red })
+-- end
+--
+-- ------------------------------------------------------------------------
+-- --                              Statusline                            --
+-- ------------------------------------------------------------------------
+-- function M.activeLine()
+--   local statusline = ""
+--   -- Component: Mode
+--   local mode = vim.api.nvim_get_mode().mode
+--   local mode_hl, sep_hl = get_mode_hl(mode)

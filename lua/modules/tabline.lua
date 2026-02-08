@@ -109,7 +109,7 @@ local function tab_segment(tab, label, selected)
 end
 
 ---@return string
-function M.init()
+function M.render()
   if not config.get().tabline then
     return ""
   end
