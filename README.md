@@ -1,3 +1,19 @@
+This is the fork version of [beauwilliams' statusline](https://github.com/beauwilliams/statusline.lua).
+
+I made a few small modifications while keeping the original beautiful design remained:
+
+- Windows OS support
+
+- A modern refactor(not done yet)
+
+- A better format style for [stylua](https://github.com/JohnnyMorganz/StyLua)
+
+- Type information for function signatures
+
+- Maybe a little speed-up?
+
+---
+
 [![GitHub stars](https://img.shields.io/github/stars/beauwilliams/statusline.lua.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/beauwilliams/statusline.lua/stargazers/)
 [![Requires](https://img.shields.io/badge/requires-nvim%200.5%2B-9cf?logo=neovim)](https://neovim.io//)
 [![GitHub contributors](https://img.shields.io/github/contributors/beauwilliams/statusline.lua.svg)](https://GitHub.com/beauwilliams/statusline.lua/graphs/contributors/)
