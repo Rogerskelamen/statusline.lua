@@ -64,14 +64,16 @@ local set_colours = function()
   ---@type ColorScheme
   local c = colors.get()
 
+  -- stylua: ignore start
   ---@type table<string, vim.api.keyset.highlight>
   local tabline_hls = {
-    TabLineSel = { fg = c.black_fg, bg = c.green, bold = true },
-    TabLineSelSeparator = { fg = c.green, bold = true },
-    TabLine = { fg = c.white_fg, bg = c.inactive_bg },
-    TabLineSeparator = { fg = c.inactive_bg },
-    TabLineFill = { bg = "none" },
+    TabLineSel          = { fg = c.black_fg,   bg = c.green,      bold = true },
+    TabLineSelSeparator = { fg = c.green,                         bold = true },
+    TabLine             = { fg = c.white_fg,   bg = c.inactive_bg             },
+    TabLineSeparator    = { fg = c.inactive_bg                                },
+    TabLineFill         = {                    bg = "none"                    },
   }
+  -- stylua: ignore end
 
   ---@param name string
   ---@param override vim.api.keyset.highlight
@@ -114,6 +116,7 @@ function M.init()
 
   set_colours()
 
+  ---@type table<string>
   local parts = {}
   local tab_list = api.nvim_list_tabpages()
   local current_tab = api.nvim_get_current_tabpage()
