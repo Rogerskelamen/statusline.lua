@@ -14,14 +14,16 @@ local left_separator = ""
 local right_separator = ""
 local space = " "
 
+local DIR_MAX_LEN = 25
+
 ---Trim dir with '~' char and make sure it's less then 30
 ---@param dir string
 ---@return string
 local TrimmedDirectory = function(dir)
   local home = uv.os_homedir()
   if vim.startswith(dir, home) and #dir ~= #home then
-    if #dir > 30 then
-      dir = ".." .. dir:sub(30)
+    if #dir > DIR_MAX_LEN then
+      dir = ".." .. dir:sub(DIR_MAX_LEN)
     end
     local new_dir = dir:gsub(home, "~")
     return new_dir
@@ -29,23 +31,33 @@ local TrimmedDirectory = function(dir)
   return dir
 end
 
----@param n integer
+---@param tab integer
 ---@return string
-local getTabLabel = function(n)
-  local win = vim.api.nvim_tabpage_get_win(n)
-  local file_name = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(win))
-  if vim.startswith(file_name, "term://") then
-    return " " .. vim.fs.basename(file_name)
+local get_tab_label = function(tab)
+  local wins = vim.api.nvim_tabpage_list_wins(tab)
+  local first_win = wins[1]
+  local buf = vim.api.nvim_win_get_buf(first_win)
+
+  if vim.bo[buf].buftype == "terminal" then
+    return " Term" -- vim.fs.basename could get wrong, so hard coding here
   end
-  file_name = vim.fs.basename(file_name)
-  if file_name == "" then
+
+  local name = vim.api.nvim_buf_get_name(buf)
+  local fname = vim.fs.basename(name)
+  if fname == "" then
+    local bt = vim.bo[buf].buftype
+    if bt ~= "" then
+      return bt
+    end
     return "No Name"
   end
-  local icon = icons.devicon_table[file_name]
+
+  local ext = vim.fn.fnamemodify(fname, ":e")
+  local icon = icons.devicon_table[ext]
   if icon then
-    return icon .. space .. file_name
+    return icon .. space .. fname
   end
-  return file_name
+  return fname
 end
 
 local set_colours = function()
@@ -74,45 +86,61 @@ local set_colours = function()
   end
 end
 
+---Build correct tabline format string
+---@param tab integer
+---@param label string
+---@param selected boolean
+---@return string
+local function tab_segment(tab, label, selected)
+  local sep_hl = selected and "TabLineSelSeparator" or "TabLineSeparator"
+  local text_hl = selected and "TabLineSel" or "TabLine"
+
+  -- stylua: ignore start
+  return table.concat({
+    "%",   tab,     "T",
+    "%#",  sep_hl,  "# ", left_separator,
+    "%#",  text_hl, "# ", label,
+    " %#", sep_hl,  "#",  right_separator,
+    "%T",
+  })
+  -- stylua: ignore end
+end
+
+---@return string
 function M.init()
   if not config.get().tabline then
     return ""
   end
 
   set_colours()
-  local tabline = ""
+
+  local parts = {}
   local tab_list = api.nvim_list_tabpages()
   local current_tab = api.nvim_get_current_tabpage()
 
-  for _, val in ipairs(tab_list) do
-    local file_name = getTabLabel(val)
-    if val == current_tab then
-      tabline = tabline .. "%" .. val .. "T"
-      tabline = tabline .. "%#TabLineSelSeparator# " .. left_separator
-      tabline = tabline .. "%#TabLineSel# " .. file_name
-      tabline = tabline .. " %#TabLineSelSeparator#" .. right_separator
-      tabline = tabline .. "%T"
-    else
-      tabline = tabline .. "%" .. val .. "T"
-      tabline = tabline .. "%#TabLineSeparator# " .. left_separator
-      tabline = tabline .. "%#TabLine# " .. file_name
-      tabline = tabline .. " %#TabLineSeparator#" .. right_separator
-      tabline = tabline .. "%T"
-    end
+  -- stylua: ignore start
+  for _, tab in ipairs(tab_list) do
+    parts[#parts + 1] = tab_segment(
+      tab,
+      get_tab_label(tab),
+      tab == current_tab
+    )
   end
+  -- stylua: ignore end
 
-  tabline = tabline .. "%="
-  local dir = api.nvim_call_function("getcwd", {})
-  tabline = tabline
-    .. "%#TabLineSeparator#"
-    .. left_separator
-    .. "%#Tabline# "
-    .. TrimmedDirectory(dir)
-    .. "%#TabLineSeparator#"
-    .. right_separator
+  -- right aligned cwd
+  parts[#parts + 1] = "%="
+  parts[#parts + 1] = table.concat({
+    "%#TabLineSeparator#",
+    left_separator,
+    "%#TabLine# ",
+    TrimmedDirectory(uv.cwd()),
+    "%#TabLineSeparator#",
+    right_separator,
+    space,
+  })
 
-  tabline = tabline .. space
-  return tabline
+  return table.concat(parts)
 end
 
 return M
