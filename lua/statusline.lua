@@ -9,10 +9,13 @@
 --                             Variables                              --
 ------------------------------------------------------------------------
 
-local tabline = require("modules.tabline")
-local statusline = require("modules.statusline")
 local config = require("modules.config")
+local statusline = require("modules.statusline")
+local tabline = require("modules.tabline")
 local M = {}
+
+---@type integer
+local statusline_group = vim.api.nvim_create_augroup("StatuslineGroup", { clear = true })
 
 ------------------------------------------------------------------------
 --                              Init                                  --
@@ -23,38 +26,29 @@ function M.setup(user_config)
   config.setup(user_config)
   statusline.set_highlights()
 
-  vim.api.nvim_create_augroup("StatuslineGroup", { clear = true })
-
   vim.api.nvim_create_autocmd("ColorScheme", {
-    group = "StatuslineGroup",
+    group = statusline_group,
     callback = function()
       statusline.set_highlights()
     end,
   })
 
-  vim.api.nvim_create_autocmd("BufEnter", {
-    group = "StatuslineGroup",
-    callback = function()
-      M.activeLine()
-    end,
-  })
-
   vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
-    group = "StatuslineGroup",
+    group = statusline_group,
     callback = function()
       M.activeLine()
     end,
   })
 
   vim.api.nvim_create_autocmd({ "WinLeave", "BufLeave" }, {
-    group = "StatuslineGroup",
+    group = statusline_group,
     callback = function()
       M.inActiveLine()
     end,
   })
 
   vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "WinLeave", "BufLeave" }, {
-    group = "StatuslineGroup",
+    group = statusline_group,
     pattern = "NvimTree",
     callback = function()
       M.simpleLine()
@@ -62,7 +56,7 @@ function M.setup(user_config)
   })
 
   vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
-    group = "StatuslineGroup",
+    group = statusline_group,
     callback = function()
       M.tabline_init()
     end,

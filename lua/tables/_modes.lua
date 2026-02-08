@@ -2,40 +2,42 @@ local M = {}
 
 ---@type table<string, string>
 local mode_map = {
-  n  = "N",
+  n = "N",
   no = "N·Op",
   nt = "N·Term",
 
-  v  = "V",
-  V  = "V·Line",
-  ["\22"] = "V·Block",  -- <C-v>
+  v = "V",
+  V = "V·Line",
+  ["\22"] = "V·Block", -- <C-v>
 
-  s  = "Select",
-  S  = "S·Line",
-  ["\19"] = "S·Block",  -- <C-s>
+  s = "Select",
+  S = "S·Line",
+  ["\19"] = "S·Block", -- <C-s>
 
-  i  = "I",
+  i = "I",
   ic = "I",
   ix = "I",
 
-  R  = "Replace",
+  R = "Replace",
   Rv = "V·Replace",
 
-  c  = "C",
+  c = "C",
   cv = "Vim·EX",
   ce = "Ex",
 
-  r  = "Prompt",
+  r = "Prompt",
   rm = "More",
   ["r?"] = "Confirm",
 
   ["!"] = "Shell",
-  t  = "T",
+  t = "T",
 }
 
 -- key sort: longer key has high priority
 local sorted = vim.tbl_keys(mode_map)
-table.sort(sorted, function(a, b) return #a > #b end)
+table.sort(sorted, function(a, b)
+  return #a > #b
+end)
 
 ---Map current mode to a certain prompt
 ---@param mode string

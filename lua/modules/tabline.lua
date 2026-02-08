@@ -5,9 +5,9 @@ local M = {}
 
 local api = vim.api
 local uv = vim.uv or vim.loop
-local icons = require("tables._icons")
-local config = require("modules.config")
 local colors = require("modules.colors")
+local config = require("modules.config")
+local icons = require("tables._icons")
 
 -- Separators
 local left_separator = ""
@@ -54,11 +54,11 @@ local set_colours = function()
 
   ---@type table<string, vim.api.keyset.highlight>
   local tabline_hls = {
-    TabLineSel          = { fg = c.black_fg,   bg = c.green,      bold = true },
-    TabLineSelSeparator = { fg = c.green,                         bold = true },
-    TabLine             = { fg = c.white_fg,   bg = c.inactive_bg             },
-    TabLineSeparator    = { fg = c.inactive_bg                                },
-    TabLineFill         = {                    bg = "none"                    },
+    TabLineSel = { fg = c.black_fg, bg = c.green, bold = true },
+    TabLineSelSeparator = { fg = c.green, bold = true },
+    TabLine = { fg = c.white_fg, bg = c.inactive_bg },
+    TabLineSeparator = { fg = c.inactive_bg },
+    TabLineFill = { bg = "none" },
   }
 
   ---@param name string
@@ -75,7 +75,9 @@ local set_colours = function()
 end
 
 function M.init()
-  if not config.get().tabline then return "" end
+  if not config.get().tabline then
+    return ""
+  end
 
   set_colours()
   local tabline = ""
@@ -102,12 +104,12 @@ function M.init()
   tabline = tabline .. "%="
   local dir = api.nvim_call_function("getcwd", {})
   tabline = tabline
-  .. "%#TabLineSeparator#"
-  .. left_separator
-  .. "%#Tabline# "
-  .. TrimmedDirectory(dir)
-  .. "%#TabLineSeparator#"
-  .. right_separator
+    .. "%#TabLineSeparator#"
+    .. left_separator
+    .. "%#Tabline# "
+    .. TrimmedDirectory(dir)
+    .. "%#TabLineSeparator#"
+    .. right_separator
 
   tabline = tabline .. space
   return tabline
