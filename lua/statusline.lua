@@ -45,7 +45,7 @@ function M.setup(user_config)
   vim.api.nvim_create_autocmd("ColorScheme", {
     callback = function()
       status_mod.set_highlights()
-      require("modules.tabline").set_colours()
+      require("modules.tabline").set_tabline_hl()
     end,
   })
 

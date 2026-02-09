@@ -60,7 +60,7 @@ local get_tab_label = function(tab)
   return fname
 end
 
-local set_colours = function()
+function M.set_tabline_hl()
   ---@type ColorScheme
   local c = colors.get()
 
@@ -113,8 +113,6 @@ function M.render()
   if not config.get().tabline then
     return ""
   end
-
-  set_colours()
 
   ---@type table<string>
   local parts = {}
