@@ -1,12 +1,10 @@
+local M = {}
+
 ---@class StatuslineConfig
 ---@field match_colorscheme boolean
 ---@field tabline boolean
 ---@field lsp_diagnostics boolean
 ---@field ale_diagnostics boolean
-
-local M = {}
-
----@type StatuslineConfig
 local defaults = {
   match_colorscheme = false,
   tabline = true,

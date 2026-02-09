@@ -2,6 +2,11 @@
 --                             Colours                                --
 ------------------------------------------------------------------------
 
+local config = require("modules.config")
+
+local M = {}
+
+-- Default colours
 ---@class ColorScheme
 ---@field purple string
 ---@field blue string
@@ -13,13 +18,6 @@
 ---@field white_fg string
 ---@field statusline_bg string
 ---@field statusline_fg string
-
-local config = require("modules.config")
-
-local M = {}
-
--- Default colours
----@type ColorScheme
 local defaults = {
   -- Different colors for mode
   purple = "#BF616A", --#B48EAD

@@ -1,14 +1,3 @@
---[[
-   _____  ______    ___   ______   __  __   _____    __     ____    _   __    ______
-  / ___/ /_  __/   /   | /_  __/  / / / /  / ___/   / /    /  _/   / | / /   / ____/
-  \__ \   / /     / /| |  / /    / / / /   \__ \   / /     / /    /  |/ /   / __/
- ___/ /  / /     / ___ | / /    / /_/ /   ___/ /  / /___ _/ /    / /|  /   / /___
-/____/  /_/     /_/  |_|/_/     \____/   /____/  /_____//___/   /_/ |_/   /_____/
---]]
-------------------------------------------------------------------------
---                             Variables                              --
-------------------------------------------------------------------------
-
 local cmd = vim.api.nvim_command
 local buficon = require("sections._buficon")
 local bufmod = require("sections._bufmodified")
@@ -19,6 +8,7 @@ local git_branch = require("sections._git_branch")
 local lsp = require("sections._lsp")
 local modes = require("tables._modes")
 local signify = require("sections._signify")
+
 local M = {}
 
 -- Separators
@@ -150,7 +140,6 @@ function M.inActiveLine()
 end
 
 return M
-
 
 -- local function mode_group(mode)
 --   if mode:sub(1,1) == "n" then

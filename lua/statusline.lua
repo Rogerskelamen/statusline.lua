@@ -1,13 +1,14 @@
 --[[
-   _____  ______    ___   ______   __  __   _____    __     ____    _   __    ______
-  / ___/ /_  __/   /   | /_  __/  / / / /  / ___/   / /    /  _/   / | / /   / ____/
-  \__ \   / /     / /| |  / /    / / / /   \__ \   / /     / /    /  |/ /   / __/
- ___/ /  / /     / ___ | / /    / /_/ /   ___/ /  / /___ _/ /    / /|  /   / /___
-/____/  /_/     /_/  |_|/_/     \____/   /____/  /_____//___/   /_/ |_/   /_____/
+   _____  ______   ___   ______  __  __  _____    __     ____   _   __   ______
+  / ___/ /_  __/ /   | /_  __/ / / / / / ___/   / /    /  _/  / | / /  / ____/
+  \__ \   / /   / /| |  / /   / / / /  \__ \   / /     / /   /  |/ /  / __/
+ ___/ /  / /   / ___ | / /   / /_/ /  ___/ /  / /___ _/ /   / /|  /  / /___
+/____/  /_/   /_/  |_|/_/    \____/  /____/  /_____//___/  /_/ |_/  /_____/
 --]]
 
 local config = require("modules.config")
 local status_mod = require("modules.statusline")
+local tabline = require("modules.tabline")
 
 local M = {}
 
@@ -34,28 +35,39 @@ function M.render()
   end
 end
 
--- ====== setup ======
+---
+---Setup
+---
+---@param user_config StatuslineConfig
 function M.setup(user_config)
   config.setup(user_config)
-  vim.o.ruler = false --disable line numbers in bottom right for our custom indicator as above
+  local has_tabline = config.get().tabline
 
-  -- 只设置一次高亮
+  -- Disable line numbers in bottom right for our custom indicator as above
+  vim.o.ruler = false
+
+  -- Set highlights
   status_mod.set_highlights()
+  if has_tabline then
+    tabline.set_tabline_hl()
+  end
 
   vim.api.nvim_create_autocmd("ColorScheme", {
     callback = function()
       status_mod.set_highlights()
-      require("modules.tabline").set_tabline_hl()
+      if has_tabline then
+        tabline.set_tabline_hl()
+      end
     end,
   })
 
-  -- 暴露 render
+  -- Render
   _G.Statusline = M
   vim.o.statusline = "%{%v:lua.Statusline.render()%}"
 
-  -- tabline 原逻辑保留
-  if config.get().tabline then
-    _G.Tabline = require("modules.tabline")
+  -- Tabline setup
+  if has_tabline then
+    _G.Tabline = tabline
     vim.o.tabline = "%{%v:lua.Tabline.render()%}"
   end
 end
@@ -72,4 +84,3 @@ function M.use_ale()
 end
 
 return M
-
