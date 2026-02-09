@@ -18,13 +18,26 @@ local right_separator = ""
 -- Blank Between Components
 local space = " "
 
+-- Render
+function M.render()
+  local ft = vim.bo.filetype
+
+  if ft == "NvimTree" then
+    return M.simpleLine()
+  end
+
+  return M.activeLine()
+end
+
 ------------------------------------------------------------------------
 --                             Colours                                --
 ------------------------------------------------------------------------
 
+-- TODO: check why need this `last_mode`
 local last_mode = nil
 
 -- Redraw different colors for different mode
+-- TODO: refactor this set_mode_colour in lua version
 local function set_mode_colours(mode)
   if mode == last_mode then
     return
@@ -63,7 +76,9 @@ end
 ------------------------------------------------------------------------
 --                              Statusline                            --
 ------------------------------------------------------------------------
-function M.activeLine(diag_lsp, diag_ale)
+function M.activeLine()
+  local config = require("modules.config").get()
+
   local statusline = ""
   -- Component: Mode
   local mode = vim.api.nvim_get_mode().mode
@@ -83,12 +98,12 @@ function M.activeLine(diag_lsp, diag_ale)
 
   -- Component: errors and warnings -> requires ALE
   -- TODO: [beauwilliams] --> IMPLEMENT A LUA VERSION OF BELOW VIMSCRIPT FUNCS
-  if diag_ale then
+  if config.ale_diagnostics then
     statusline = statusline .. vim.call("LinterStatus")
   end
 
   -- Component: Native Nvim LSP Diagnostic
-  if diag_lsp then
+  if config.lsp_diagnostics then
     statusline = statusline .. lsp.diagnostics()
   end
 

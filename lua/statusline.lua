@@ -7,36 +7,13 @@
 --]]
 
 local config = require("modules.config")
-local status_mod = require("modules.statusline")
+local statusline = require("modules.statusline")
 local tabline = require("modules.tabline")
 
 local M = {}
 
--- 局部状态，替代全局变量
-local state = {
-  diag_lsp = false,
-  diag_ale = false,
-}
-
--- ====== 现代 render 入口 ======
-function M.render()
-  local ft = vim.bo.filetype
-
-  if ft == "NvimTree" then
-    return status_mod.simpleLine()
-  end
-
-  if state.diag_lsp then
-    return status_mod.activeLine(true, false)
-  elseif state.diag_ale then
-    return status_mod.activeLine(false, true)
-  else
-    return status_mod.activeLine(false, false)
-  end
-end
-
 ---
----Setup
+---Setup for statusline
 ---
 ---@param user_config StatuslineConfig
 function M.setup(user_config)
@@ -47,14 +24,15 @@ function M.setup(user_config)
   vim.o.ruler = false
 
   -- Set highlights
-  status_mod.set_highlights()
+  statusline.set_highlights()
   if has_tabline then
     tabline.set_tabline_hl()
   end
 
   vim.api.nvim_create_autocmd("ColorScheme", {
+    group = vim.api.nvim_create_augroup("StatuslineGroup", { clear = true }),
     callback = function()
-      status_mod.set_highlights()
+      statusline.set_highlights()
       if has_tabline then
         tabline.set_tabline_hl()
       end
@@ -62,25 +40,18 @@ function M.setup(user_config)
   })
 
   -- Render
-  _G.Statusline = M
-  vim.o.statusline = "%{%v:lua.Statusline.render()%}"
+  function _G.__statusline_render()
+    return require("modules.statusline").render()
+  end
+  vim.o.statusline = "%{%v:lua.__statusline_render()%}"
 
   -- Tabline setup
   if has_tabline then
-    _G.Tabline = tabline
-    vim.o.tabline = "%{%v:lua.Tabline.render()%}"
+    function _G.__tabline_render()
+      return require("modules.tabline").render()
+    end
+    vim.o.tabline = "%{%v:lua.__tabline_render()%}"
   end
-end
-
--- 给外部调用的接口（代替 wants_lsp/ale）
-function M.use_lsp()
-  state.diag_lsp = true
-  state.diag_ale = false
-end
-
-function M.use_ale()
-  state.diag_lsp = false
-  state.diag_ale = true
 end
 
 return M
