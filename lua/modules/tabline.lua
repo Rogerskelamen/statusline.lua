@@ -70,8 +70,8 @@ function M.set_tabline_hl()
   local tabline_hls = {
     TabLineSel          = { fg = c.black_fg,   bg = c.green,      bold = true },
     TabLineSelSeparator = { fg = c.green,                         bold = true },
-    TabLine             = { fg = c.white_fg,   bg = c.inactive_bg             },
-    TabLineSeparator    = { fg = c.inactive_bg                                },
+    TabLine             = { fg = c.white_fg,   bg = c.tabline_bg             },
+    TabLineSeparator    = { fg = c.tabline_bg                                },
     TabLineFill         = {                    bg = "none"                    },
   }
   -- stylua: ignore end

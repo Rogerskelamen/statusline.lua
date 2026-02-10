@@ -14,8 +14,9 @@ local M = {}
 ---@field green string
 ---@field red string
 ---@field black_fg string
----@field inactive_bg string
 ---@field white_fg string
+---@field tabline_bg string
+---@field inactive_bg string
 ---@field statusline_bg string
 ---@field statusline_fg string
 local defaults = {
@@ -31,11 +32,12 @@ local defaults = {
   black_fg = "#282c34",
 
   -- Inactive bg
-  inactive_bg = "#1c1c1c",
+  tabline_bg = "#1c1c1c",
+  inactive_bg = "none",
 
   -- Statusline colour
-  statusline_bg = "NONE", -- Set to none, use native bg
-  statusline_fg = "NONE",
+  statusline_bg = "none", -- Set to none, use native bg
+  statusline_fg = "none",
 }
 
 ---@type ColorScheme|nil
@@ -68,6 +70,7 @@ local function compute_colors()
     red = get_color("Error", "foreground", defaults.red),
     white_fg = get_color("Normal", "foreground", defaults.white_fg),
     black_fg = get_color("Normal", "background", defaults.black_fg),
+    tabline_bg = get_color("NormalNC", "background", defaults.tabline_bg),
     inactive_bg = get_color("NormalNC", "background", defaults.inactive_bg),
     statusline_bg = defaults.statusline_bg,
     statusline_fg = defaults.statusline_fg,
