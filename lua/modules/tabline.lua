@@ -8,6 +8,7 @@ local uv = vim.uv or vim.loop
 local colors = require("modules.colors")
 local config = require("modules.config")
 local icons = require("tables._icons")
+local utils = require("modules.utils")
 
 -- Separators
 local left_separator = ""
@@ -75,16 +76,8 @@ function M.set_tabline_hl()
   }
   -- stylua: ignore end
 
-  ---@param name string
-  ---@param override vim.api.keyset.highlight
-  ---@return vim.api.keyset.highlight
-  local function inherit(name, override)
-    local base = api.nvim_get_hl(0, { name = name, link = false })
-    return vim.tbl_extend("force", base, override)
-  end
-
   for hl_name, opts in pairs(tabline_hls) do
-    api.nvim_set_hl(0, hl_name, inherit(hl_name, opts))
+    utils.hi(hl_name, opts)
   end
 end
 
