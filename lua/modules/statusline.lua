@@ -6,6 +6,7 @@ local editable = require("sections._bufeditable")
 local filesize = require("sections._filesize")
 local git_branch = require("sections._git_branch")
 local lsp = require("sections._lsp")
+local ale = require("sections._ale")
 local modes = require("tables._modes")
 local signify = require("sections._signify")
 
@@ -97,9 +98,8 @@ function M.activeLine()
   statusline = statusline .. buficon.get_file_icon()
 
   -- Component: errors and warnings -> requires ALE
-  -- TODO: [beauwilliams] --> IMPLEMENT A LUA VERSION OF BELOW VIMSCRIPT FUNCS
   if config.ale_diagnostics then
-    statusline = statusline .. vim.call("LinterStatus")
+    statusline = statusline .. ale.diagnostics()
   end
 
   -- Component: Native Nvim LSP Diagnostic
