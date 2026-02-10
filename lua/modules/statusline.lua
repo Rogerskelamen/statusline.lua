@@ -24,10 +24,10 @@ function M.render()
   local ft = vim.bo.filetype
 
   if ft == "NvimTree" then
-    return M.simpleLine()
+    return M.simple_line()
   end
 
-  return M.activeLine()
+  return M.active_line()
 end
 
 ------------------------------------------------------------------------
@@ -103,77 +103,71 @@ end
 ------------------------------------------------------------------------
 --                              Statusline                            --
 ------------------------------------------------------------------------
-function M.activeLine()
+function M.active_line()
   local config = require("modules.config").get()
 
-  local statusline = ""
+  ---@type string[]
+  local stl = {} -- 'stl' for 'statusline'
 
   -- Component: Mode
   local mode = vim.api.nvim_get_mode().mode
   local mode_hl, sep_hl = get_mode_hl(mode)
-  statusline = statusline .. "%#" .. sep_hl .. "#" .. space -- one space indent
-  statusline = statusline
-    .. "%#"
-    .. sep_hl
-    .. "#"
-    .. left_separator
-    .. "%#"
-    .. mode_hl
-    .. "# "
-    .. modes.current_mode(mode)
-    .. " %#"
-    .. sep_hl
-    .. "#"
-    .. right_separator
-    .. space
+
+  stl[#stl + 1] = "%#" .. sep_hl .. "#" .. space -- one space indent
+  stl[#stl + 1] = "%#" .. sep_hl .. "#" .. left_separator
+  stl[#stl + 1] = "%#" .. mode_hl .. "# " .. modes.current_mode(mode)
+  stl[#stl + 1] = " %#" .. sep_hl .. "#" .. right_separator .. space
 
   -- Component: Filetype and icons
-  statusline = statusline .. "%#StatusLine#" .. bufname.get_buffer_name()
-  statusline = statusline .. buficon.get_file_icon()
+  stl[#stl + 1] = "%#StatusLine#" .. bufname.get_buffer_name()
+  stl[#stl + 1] = buficon.get_file_icon()
 
   -- Component: errors and warnings -> requires ALE
   if config.ale_diagnostics then
-    statusline = statusline .. ale.diagnostics()
+    stl[#stl + 1] = ale.diagnostics()
   end
 
   -- Component: Native Nvim LSP Diagnostic
   if config.lsp_diagnostics then
-    statusline = statusline .. lsp.diagnostics()
+    stl[#stl + 1] = lsp.diagnostics()
   end
 
   -- TODO: SUPPORT COC LATER, NEEDS TESTING WITH COC USERS FIRST
-  -- statusline = statusline..M.cocStatus()
+  -- stl[#stl + 1] = M.cocStatus()
 
   -- Component: git commit stats -> REQUIRES SIGNIFY
-  statusline = statusline .. signify.signify()
+  stl[#stl + 1] = signify.signify()
 
   -- Component: git branch name -> requires FUGITIVE
-  statusline = statusline .. git_branch.branch()
+  stl[#stl + 1] = git_branch.branch()
 
   --Component: Lsp Progress
   -- if lsp.lsp_progress()~= nil then
-  statusline = statusline .. lsp.lsp_progress()
-  statusline = statusline .. "%#Statusline_LSP_Func# " .. lsp.lightbulb()
+  stl[#stl + 1] = lsp.lsp_progress()
+  stl[#stl + 1] = "%#Statusline_LSP_Func# " .. lsp.lightbulb()
   -- end
 
   -- RIGHT SIDE INFO
   -- Alignment to left
-  statusline = statusline .. "%="
+  stl[#stl + 1] = "%="
 
   -- Component: LSP CURRENT FUCTION --> Requires LSP
-  statusline = statusline .. "%#Statusline_LSP_Func# " .. lsp.current_function()
+  stl[#stl + 1] = "%#Statusline_LSP_Func# " .. lsp.current_function()
 
   -- Scrollbar
-  -- statusline = statusline.."%#StatusLine#"..vim.call('Scrollbar')..space
+  -- stl[#stl + 1] = "%#StatusLine#" .. vim.call('Scrollbar') .. space
 
   -- Component: Modified, Read-Only, Filesize, Row/Col
-  statusline = statusline .. "%#StatusLine#" .. bufmod.is_buffer_modified()
-  statusline = statusline .. editable.editable() .. filesize.get_file_size() .. [[ʟ %l/%L c %c]] .. space
-  return statusline
+  stl[#stl + 1] = "%#StatusLine#" .. bufmod.is_buffer_modified()
+  stl[#stl + 1] = editable.editable()
+  stl[#stl + 1] = filesize.get_file_size()
+  stl[#stl + 1] = [[ʟ %l/%L c %c]] .. space
+
+  return table.concat(stl)
 end
 
 -- statusline for simple buffers such as NvimTree where you don't need mode indicators etc
-function M.simpleLine()
+function M.simple_line()
   local statusline = ""
   return statusline .. "%#StatusLine#" .. bufname.get_buffer_name() .. ""
 end

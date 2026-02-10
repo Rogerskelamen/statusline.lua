@@ -107,14 +107,14 @@ function M.render()
     return ""
   end
 
-  ---@type table<string>
-  local parts = {}
+  ---@type string[]
+  local tabline = {}
   local tab_list = api.nvim_list_tabpages()
   local current_tab = api.nvim_get_current_tabpage()
 
   -- stylua: ignore start
   for _, tab in ipairs(tab_list) do
-    parts[#parts + 1] = tab_segment(
+    tabline[#tabline + 1] = tab_segment(
       tab,
       get_tab_label(tab),
       tab == current_tab
@@ -123,8 +123,8 @@ function M.render()
   -- stylua: ignore end
 
   -- right aligned cwd
-  parts[#parts + 1] = "%="
-  parts[#parts + 1] = table.concat({
+  tabline[#tabline + 1] = "%="
+  tabline[#tabline + 1] = table.concat({
     "%#TabLineSeparator#",
     left_separator,
     "%#TabLine# ",
@@ -134,7 +134,7 @@ function M.render()
     space,
   })
 
-  return table.concat(parts)
+  return table.concat(tabline)
 end
 
 return M

@@ -2,9 +2,11 @@ This is the fork version of [beauwilliams' statusline](https://github.com/beauwi
 
 I made a few small modifications while keeping the original beautiful design remained:
 
-- Windows OS support
+- Windows OS compatible
 
-- A modern refactor(not done yet)
+- Proper display in terminal mode
+
+- A modern Lua coding style
 
 - A better format style for [stylua](https://github.com/JohnnyMorganz/StyLua)
 

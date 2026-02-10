@@ -12,30 +12,34 @@ local tabline = require("modules.tabline")
 
 local M = {}
 
+---@type boolean
+local has_tabline = true
+
+local function setup_hl()
+  statusline.set_highlights()
+  if has_tabline then
+    tabline.set_tabline_hl()
+  end
+end
+
 ---
 ---Setup for statusline
 ---
 ---@param user_config StatuslineConfig
 function M.setup(user_config)
   config.setup(user_config)
-  local has_tabline = config.get().tabline
+  has_tabline = config.get().tabline
 
   -- Disable line numbers in bottom right for our custom indicator as above
   vim.o.ruler = false
 
   -- Set highlights
-  statusline.set_highlights()
-  if has_tabline then
-    tabline.set_tabline_hl()
-  end
+  setup_hl()
 
   vim.api.nvim_create_autocmd("ColorScheme", {
     group = vim.api.nvim_create_augroup("StatuslineGroup", { clear = true }),
     callback = function()
-      statusline.set_highlights()
-      if has_tabline then
-        tabline.set_tabline_hl()
-      end
+      setup_hl()
     end,
   })
 
@@ -45,7 +49,7 @@ function M.setup(user_config)
   end
   vim.o.statusline = "%{%v:lua.__statusline_render()%}"
 
-  -- Tabline setup
+  -- Tabline render
   if has_tabline then
     function _G.__tabline_render()
       return require("modules.tabline").render()
