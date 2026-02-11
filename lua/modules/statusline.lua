@@ -80,9 +80,9 @@ function M.set_highlights()
 
   -- set StatusLine highlight
   hi("StatusLine", { fg = c.statusline_fg, bg = c.statusline_bg })
-  hi("StatusLineNC", { fg = c.white_fg, bg = c.inactive_bg })
+  hi("StatusLineNC", { fg = c.gray_fg, bg = c.inactive_bg })
   hi("StatusLineTerm", { fg = c.statusline_fg, bg = c.statusline_bg })
-  hi("StatusLineTermNC", { fg = c.white_fg, bg = c.inactive_bg })
+  hi("StatusLineTermNC", { fg = c.gray_fg, bg = c.inactive_bg })
 
   -- set Statusline_LSP_Func highlight
   hi("Statusline_LSP_Func", { fg = c.statusline_fg, bg = c.statusline_bg })

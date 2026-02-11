@@ -6,11 +6,9 @@ I made a few small modifications while keeping the original beautiful design rem
 
 - Proper display in terminal mode
 
-- A modern Lua coding style
+- A modern Lua coding style and a modern build for statusline
 
 - A better format style for [stylua](https://github.com/JohnnyMorganz/StyLua)
-
-- Type information for function signatures
 
 - Maybe a little speed-up?
 

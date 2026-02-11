@@ -13,8 +13,9 @@ local M = {}
 ---@field yellow string
 ---@field green string
 ---@field red string
----@field black_fg string
+---@field gray_fg string
 ---@field white_fg string
+---@field black_fg string
 ---@field tabline_bg string
 ---@field inactive_bg string
 ---@field statusline_bg string
@@ -28,6 +29,7 @@ local defaults = {
   red = "#fb4934", --#BF616A
 
   -- fg and bg
+  gray_fg = "#859289",
   white_fg = "#b8b894",
   black_fg = "#282c34",
 
@@ -68,10 +70,11 @@ local function compute_colors()
     yellow = get_color("Constant", "foreground", defaults.yellow),
     green = get_color("String", "foreground", defaults.green),
     red = get_color("Error", "foreground", defaults.red),
+    gray_fg = get_color("Grey", "foreground", defaults.gray_fg),
     white_fg = get_color("Normal", "foreground", defaults.white_fg),
     black_fg = get_color("Normal", "background", defaults.black_fg),
     tabline_bg = get_color("NormalNC", "background", defaults.tabline_bg),
-    inactive_bg = get_color("NormalNC", "background", defaults.inactive_bg),
+    inactive_bg = defaults.inactive_bg,
     statusline_bg = defaults.statusline_bg,
     statusline_fg = defaults.statusline_fg,
   }
