@@ -177,7 +177,8 @@ end
 ------------------------------------------------------------------------
 
 -- INACTIVE FUNCTION DISPLAY
-function M.inActiveLine()
+-- TODO: make inactive line usable, it's abandoned for now
+function M.inactive_line()
   local statusline = ""
   return statusline .. bufname.get_buffer_name() .. buficon.get_file_icon()
 end

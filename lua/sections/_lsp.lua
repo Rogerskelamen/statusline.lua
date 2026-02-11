@@ -10,7 +10,7 @@ function M.current_function()
   return "󰊕" .. space .. lsp_function .. space
 end
 
--- icons       
+-- icons      
 function M.diagnostics()
   local diagnostics = ""
   local has_vim_diagnostics, _ = pcall(require, "vim.diagnostic")
