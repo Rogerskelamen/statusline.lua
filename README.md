@@ -14,6 +14,14 @@ I made a few small modifications while keeping the original beautiful design rem
 
 ---
 
+Buffer recognition:
+
+- [nvim-tree.lua](https://github.com/nvim-tree/nvim-tree.lua)
+
+- [outline.nvim](https://github.com/hedyhli/outline.nvim)
+
+---
+
 [![GitHub stars](https://img.shields.io/github/stars/beauwilliams/statusline.lua.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/beauwilliams/statusline.lua/stargazers/)
 [![Requires](https://img.shields.io/badge/requires-nvim%200.5%2B-9cf?logo=neovim)](https://neovim.io//)
 [![GitHub contributors](https://img.shields.io/github/contributors/beauwilliams/statusline.lua.svg)](https://GitHub.com/beauwilliams/statusline.lua/graphs/contributors/)

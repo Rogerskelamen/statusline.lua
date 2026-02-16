@@ -178,7 +178,9 @@ function M.simple_line(bufnr)
   local filename = bufname.get_buffer_name(bufnr)
 
   if filename:find("NvimTree") then
-    return "Explorer" .. space .. ""
+    return "Explorer" .. space .. ""
+  elseif filename:find("OUTLINE") then
+    return "Outline" .. space .. ""
   else -- fallback
     return M.active_line()
   end
