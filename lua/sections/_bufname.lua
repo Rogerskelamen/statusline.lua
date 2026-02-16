@@ -1,13 +1,15 @@
 local M = {}
 local space = " "
-function M.get_buffer_name() --> IF We are in a buffer such as terminal or startify with no filename just display the buffer 'type' i.e "startify"
-  local filename = vim.fn.expand("%:t") -- api.nvim_call_function('expand', {'%f'})
 
-  local filetype = vim.bo.ft --> Get vim filetype using nvim api
+---Get file name according to bufnr
+---@param bufnr? integer
+---@return string
+function M.get_buffer_name(bufnr) --> IF We are in a buffer such as terminal or startify with no filename just display the buffer 'type' i.e "startify"
+  local name = vim.api.nvim_buf_get_name(bufnr or 0)
+  local filename = vim.fn.fnamemodify(name, ":t")
+  local filetype = vim.bo[bufnr or 0].filetype
+
   if filename ~= "" then --> IF filetype empty i.e in a terminal buffer etc, return name of buffer (filetype)
-    if string.find(filename, "NvimTree") then
-      return "File Tree" .. space
-    end
     return filename .. space
   else
     if filetype ~= "" then

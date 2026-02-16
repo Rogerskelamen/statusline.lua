@@ -23,6 +23,7 @@ local M = {}
 ---@type boolean
 local use_tabline = true
 
+---Setup highlights for statusline and tabline
 local function setup_hl()
   statusline.set_highlights()
   if use_tabline then
@@ -65,7 +66,7 @@ function M.setup(user_config)
   function _G.__statusline_render()
     return require("modules.statusline").render()
   end
-  vim.o.statusline = "%{%v:lua.__statusline_render()%}"
+  vim.o.statusline = "%!v:lua.__statusline_render()"
 
   -- Tabline render
   if use_tabline then

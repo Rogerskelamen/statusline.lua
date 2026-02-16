@@ -19,12 +19,18 @@ local right_separator = ""
 -- Blank Between Components
 local space = " "
 
--- Render
+-- Main Render function
 function M.render()
-  local ft = vim.bo.filetype
+  local winid = vim.g.statusline_winid
+  local bufnr = vim.api.nvim_win_get_buf(winid)
+  local bt = vim.bo[bufnr].buftype
 
-  if ft == "NvimTree" then
-    return M.simple_line()
+  if bt ~= "" then
+    return M.simple_line(bufnr)
+  end
+
+  if winid ~= vim.api.nvim_get_current_win() then
+    return M.inactive_line(bufnr)
   end
 
   return M.active_line()
@@ -167,9 +173,14 @@ function M.active_line()
 end
 
 -- statusline for simple buffers such as NvimTree where you don't need mode indicators etc
-function M.simple_line()
-  local statusline = ""
-  return statusline .. "%#StatusLine#" .. bufname.get_buffer_name() .. ""
+function M.simple_line(bufnr)
+  local filename = bufname.get_buffer_name(bufnr)
+
+  if filename:find("NvimTree") then
+    return "Explorer" .. space .. ""
+  else
+    return M.active_line()
+  end
 end
 
 ------------------------------------------------------------------------
@@ -177,10 +188,8 @@ end
 ------------------------------------------------------------------------
 
 -- INACTIVE FUNCTION DISPLAY
--- TODO: make inactive line usable, it's abandoned for now
-function M.inactive_line()
-  local statusline = ""
-  return statusline .. bufname.get_buffer_name() .. buficon.get_file_icon()
+function M.inactive_line(bufnr)
+  return bufname.get_buffer_name(bufnr) .. buficon.get_file_icon(bufnr)
 end
 
 return M
