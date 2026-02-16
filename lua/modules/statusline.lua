@@ -25,7 +25,7 @@ function M.render()
   local bufnr = vim.api.nvim_win_get_buf(winid)
   local bt = vim.bo[bufnr].buftype
 
-  if bt ~= "" then
+  if bt ~= "" and bt ~= "terminal" then
     return M.simple_line(bufnr)
   end
 
@@ -89,6 +89,7 @@ function M.set_highlights()
   hi("StatusLineNC", { fg = c.gray_fg, bg = c.inactive_bg })
   hi("StatusLineTerm", { fg = c.statusline_fg, bg = c.statusline_bg })
   hi("StatusLineTermNC", { fg = c.gray_fg, bg = c.inactive_bg })
+  hi("SLNCIndicator", { fg = c.gray_fg, bg = c.tabline_bg })
 
   -- set Statusline_LSP_Func highlight
   hi("Statusline_LSP_Func", { fg = c.statusline_fg, bg = c.statusline_bg })
@@ -178,7 +179,7 @@ function M.simple_line(bufnr)
 
   if filename:find("NvimTree") then
     return "Explorer" .. space .. ""
-  else
+  else -- fallback
     return M.active_line()
   end
 end
@@ -189,7 +190,7 @@ end
 
 -- INACTIVE FUNCTION DISPLAY
 function M.inactive_line(bufnr)
-  return bufname.get_buffer_name(bufnr) .. buficon.get_file_icon(bufnr)
+  return bufname.get_buffer_name(bufnr) .. buficon.get_file_icon(bufnr) .. "%#SLNCIndicator#[INACTIVE]%#StatusLineNC#"
 end
 
 return M
