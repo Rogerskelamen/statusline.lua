@@ -41,6 +41,7 @@ function M.setup(user_config)
 
   -- Disable line numbers in bottom right for our custom indicator as above
   vim.o.ruler = false
+  vim.o.showcmd = false
 
   -- Set highlights
   setup_hl()
