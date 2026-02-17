@@ -173,26 +173,48 @@ function M.active_line()
   return table.concat(stl)
 end
 
--- statusline for simple buffers such as NvimTree where you don't need mode indicators etc
+----------------------------------------------------------------------
+--                              Simple                              --
+----------------------------------------------------------------------
+
+---Statusline for simple buffers such as NvimTree
+---where you don't need mode indicators etc
+---@param bufnr integer
+---@return string
 function M.simple_line(bufnr)
   local filename = bufname.get_buffer_name(bufnr)
 
+  ---@type string[]
+  local stl = {}
+  stl[#stl + 1] = "%#SLModeSepNormal#" .. space -- one space indent
+  stl[#stl + 1] = "%#SLModeSepNormal#" .. left_separator
+  stl[#stl + 1] = "%#SLModeNormal# " .. "View"
+  stl[#stl + 1] = " %#SLModeSepNormal#" .. right_separator .. space
+  stl[#stl + 1] = "%#StatusLine#"
+
   if filename:find("NvimTree") then
-    return "Explorer" .. space .. ""
+    stl[#stl + 1] = "Explorer" .. space .. ""
   elseif filename:find("OUTLINE") then
-    return "Outline" .. space .. ""
+    stl[#stl + 1] = "Outline" .. space .. ""
   else -- fallback
     return M.active_line()
   end
+
+  return table.concat(stl)
 end
 
 ------------------------------------------------------------------------
 --                              Inactive                              --
 ------------------------------------------------------------------------
 
--- INACTIVE FUNCTION DISPLAY
+---INACTIVE FUNCTION DISPLAY
+---@param bufnr integer
+---@return string
 function M.inactive_line(bufnr)
-  return bufname.get_buffer_name(bufnr) .. buficon.get_file_icon(bufnr) .. "%#SLNCIndicator#[INACTIVE]%#StatusLineNC#"
+  return space
+    .. bufname.get_buffer_name(bufnr)
+    .. buficon.get_file_icon(bufnr)
+    .. "%#SLNCIndicator#[INACTIVE]%#StatusLineNC#"
 end
 
 return M

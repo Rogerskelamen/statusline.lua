@@ -1,7 +1,7 @@
 local M = {}
 local space = " "
 
----Get file name according to bufnr
+---Get file name or file type according to buffer number
 ---@param bufnr? integer
 ---@return string
 function M.get_buffer_name(bufnr) --> IF We are in a buffer such as terminal or startify with no filename just display the buffer 'type' i.e "startify"
