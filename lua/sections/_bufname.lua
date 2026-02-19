@@ -4,19 +4,21 @@ local space = " "
 ---Get file name or file type according to buffer number
 ---@param bufnr? integer
 ---@return string
-function M.get_buffer_name(bufnr) --> IF We are in a buffer such as terminal or startify with no filename just display the buffer 'type' i.e "startify"
-  local name = vim.api.nvim_buf_get_name(bufnr or 0)
-  local filename = vim.fn.fnamemodify(name, ":t")
-  local filetype = vim.bo[bufnr or 0].filetype
+function M.get_buffer_name(bufnr)
+  bufnr = bufnr or 0
 
-  if filename ~= "" then --> IF filetype empty i.e in a terminal buffer etc, return name of buffer (filetype)
-    return filename .. space
-  else
-    if filetype ~= "" then
-      return filetype .. space
-    else
-      return "" --> AFAIK buffers tested have types but just incase.
-    end
+  local name = vim.api.nvim_buf_get_name(bufnr)
+  if name ~= "" then
+    local fname = vim.fs and vim.fs.basename(name) or vim.fn.fnamemodify(name, ":t")
+    return fname .. space
   end
+
+  local ft = vim.bo[bufnr].filetype
+  if ft ~= "" then
+    return ft .. space
+  end
+
+  return "[No Name]" --> AFAIK buffers tested have types but just incase.
 end
+
 return M

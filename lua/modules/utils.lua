@@ -19,11 +19,18 @@ function M.hi(hl_name, hl_val)
   api.nvim_set_hl(0, hl_name, hl_val)
 end
 
----For example: utils.has_version(9) -> >=0.9?
+---For example: utils.has_version(0, 9) -> >=0.9?
+---@param major integer
 ---@param minor integer
 ---@return boolean
-function M.has_version(minor)
-  return vim.version().minor >= minor
+function M.has_version(major, minor)
+  local v = vim.version()
+  if v.major > major then
+    return true
+  elseif v.major == major then
+    return v.minor >= minor
+  end
+  return false
 end
 
 return M

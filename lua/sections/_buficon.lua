@@ -1,23 +1,31 @@
-local M = {}
-local api = vim.api
 local devicons = require("tables._icons")
-local icon
-local file_name
+
+local M = {}
 local space = " "
+
+---Get file icon according to buffer number
+---@param bufnr? integer
+---@return string
 function M.get_file_icon(bufnr)
-  --NOTE: Rather than use our internal bufname object
-  --we use full filename to detect terminal windows
-  file_name = api.nvim_buf_get_name(bufnr or 0)
-  if string.find(file_name, "term://") ~= nil then
-    icon = "" .. space
-    return icon
+  bufnr = bufnr or 0
+
+  local bt = vim.bo[bufnr].buftype
+  if bt == "terminal" then
+    return "" .. space
   end
-  icon = devicons.devicon_table[file_name]
-  if icon ~= nil then
-    return icon .. space
-  else
+
+  local name = vim.api.nvim_buf_get_name(bufnr)
+  if name == "" then
     return ""
   end
+
+  local fname = vim.fs and vim.fs.basename(name) or vim.fn.fnamemodify(name, ":t")
+  local icon = devicons.devicon_table[fname]
+  if icon then
+    return icon .. space
+  end
+
+  return ""
 end
 
 return M

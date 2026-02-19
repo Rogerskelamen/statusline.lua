@@ -44,7 +44,7 @@ local get_tab_label = function(tab)
   end
 
   local name = vim.api.nvim_buf_get_name(buf)
-  local fname = vim.fs.basename(name)
+  local fname = vim.fs and vim.fs.basename(name) or vim.fn.fnamemodify(name, ":t")
   if fname == "" then
     local bt = vim.bo[buf].buftype
     if bt ~= "" then
@@ -70,8 +70,8 @@ function M.set_tabline_hl()
   local tabline_hls = {
     TabLineSel          = { fg = c.black_fg,   bg = c.green,      bold = true },
     TabLineSelSeparator = { fg = c.green,                         bold = true },
-    TabLine             = { fg = c.white_fg,   bg = c.tabline_bg             },
-    TabLineSeparator    = { fg = c.tabline_bg                                },
+    TabLine             = { fg = c.white_fg,   bg = c.tabline_bg              },
+    TabLineSeparator    = { fg = c.tabline_bg                                 },
     TabLineFill         = {                    bg = "none"                    },
   }
   -- stylua: ignore end
