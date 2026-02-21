@@ -1,6 +1,5 @@
 local M = {}
 local space = " "
-local vim = vim
 
 function M.current_function()
   local lsp_function = vim.b.lsp_current_function
@@ -10,35 +9,66 @@ function M.current_function()
   return "󰊕" .. space .. lsp_function .. space
 end
 
+---Get diagnostics info from the buffer
+---@param bufnr? integer
+---@return table<string, integer>?
+local function get_diagnostic_counts(bufnr)
+  bufnr = bufnr or 0
+
+  -- vim.diagnostics (Neovim ≥ 0.6)
+  if vim.diagnostic then
+    local severity = vim.diagnostic.severity
+    return {
+      error = #vim.diagnostic.get(bufnr, { severity = severity.ERROR }),
+      warn = #vim.diagnostic.get(bufnr, { severity = severity.WARN }),
+      info = #vim.diagnostic.get(bufnr, { severity = severity.INFO }),
+      hint = #vim.diagnostic.get(bufnr, { severity = severity.HINT }),
+    }
+  end
+
+  -- vim.lsp.diagnostics (Neovim 0.5)
+  if vim.lsp and vim.lsp.diagnostic then
+    return {
+      error = vim.lsp.diagnostic.get_count(bufnr, "Error"),
+      warn = vim.lsp.diagnostic.get_count(bufnr, "Warning"),
+      info = vim.lsp.diagnostic.get_count(bufnr, "Information"),
+      hint = vim.lsp.diagnostic.get_count(bufnr, "Hint"),
+    }
+  end
+
+  return nil
+end
+
 -- icons      
+---@return string
 function M.diagnostics()
-  local diagnostics = ""
-  local has_vim_diagnostics, _ = pcall(require, "vim.diagnostic")
-  local has_lsp_diagnostics, _ = pcall(require, "vim.lsp.diagnostic")
-  local e, w, i, h
-  if has_vim_diagnostics then
-    local res = { 0, 0, 0, 0 }
-    for _, diagnostic in ipairs(vim.diagnostic.get(0)) do
-      res[diagnostic.severity] = res[diagnostic.severity] + 1
-    end
-    e = res[vim.diagnostic.severity.ERROR]
-    w = res[vim.diagnostic.severity.WARN]
-    i = res[vim.diagnostic.severity.INFO]
-    h = res[vim.diagnostic.severity.HINT]
-  elseif has_lsp_diagnostics then
-    e = vim.lsp.diagnostic.get_count(0, [[Error]])
-    w = vim.lsp.diagnostic.get_count(0, [[Warning]])
-    i = vim.lsp.diagnostic.get_count(0, [[Information]])
-    h = vim.lsp.diagnostic.get_count(0, [[Hint]])
-  else
+  local counts = get_diagnostic_counts(0)
+  if not counts then
     return ""
   end
 
-  diagnostics = e ~= 0 and diagnostics .. " " .. e .. space or diagnostics
-  diagnostics = w ~= 0 and diagnostics .. " " .. w .. space or diagnostics
-  diagnostics = i ~= 0 and diagnostics .. " " .. i .. space or diagnostics
-  diagnostics = h ~= 0 and diagnostics .. " " .. h .. space or diagnostics
-  return diagnostics
+  local parts = {}
+  if counts.error > 0 then
+    table.insert(parts, " " .. counts.error)
+  end
+
+  if counts.warn > 0 then
+    table.insert(parts, " " .. counts.warn)
+  end
+
+  if counts.info > 0 then
+    table.insert(parts, " " .. counts.info)
+  end
+
+  if counts.hint > 0 then
+    table.insert(parts, " " .. counts.hint)
+  end
+
+  if #parts == 0 then
+    return ""
+  end
+
+  return table.concat(parts, space) .. space
 end
 
 local function format_messages(messages)

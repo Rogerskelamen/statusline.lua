@@ -1,34 +1,42 @@
+--
+-- dense-analysis/ale
+--
+
 local M = {}
 
--- ALE style diagnostics from vim.diagnostic (Lua version of LinterStatus)
+-- Require ALE
+-- Lua version of LinterStatus
 function M.diagnostics()
-  local diagnostics = vim.diagnostic.get(0)
-
-  if not diagnostics or #diagnostics == 0 then
+  if vim.fn.exists("*ale#statusline#Count") == 0 then
     return ""
   end
 
-  local e, w = 0, 0
+  local ok, counts = pcall(vim.fn["ale#statusline#Count"], vim.api.nvim_get_current_buf())
+  if not ok or not counts then
+    return ""
+  end
 
-  for _, d in ipairs(diagnostics) do
-    if d.severity == vim.diagnostic.severity.ERROR then
-      e = e + 1
-    elseif d.severity == vim.diagnostic.severity.WARN then
-      w = w + 1
+  local all_errors = (counts.error or 0) + (counts.style_error or 0)
+  local total = counts.total or 0
+  local all_non_errors = total - all_errors
+
+  if all_errors == 0 then
+    if all_non_errors ~= 0 then
+      return string.format(" %d ", all_non_errors)
     end
   end
 
-  local s = ""
-  local space = " "
-
-  if e > 0 then
-    s = s .. " " .. e .. space
-  end
-  if w > 0 then
-    s = s .. " " .. w .. space
+  if all_non_errors == 0 then
+    if all_errors ~= 0 then
+      return string.format(" %d ", all_errors)
+    end
   end
 
-  return s
+  if total ~= 0 then
+    return string.format(" %d  %d ", all_non_errors, all_errors)
+  end
+
+  return ""
 end
 
 return M
