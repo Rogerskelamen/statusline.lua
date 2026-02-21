@@ -49,26 +49,22 @@ function M.diagnostics()
 
   local parts = {}
   if counts.error > 0 then
-    table.insert(parts, " " .. counts.error)
+    table.insert(parts, " " .. counts.error .. space)
   end
 
   if counts.warn > 0 then
-    table.insert(parts, " " .. counts.warn)
+    table.insert(parts, " " .. counts.warn .. space)
   end
 
   if counts.info > 0 then
-    table.insert(parts, " " .. counts.info)
+    table.insert(parts, " " .. counts.info .. space)
   end
 
   if counts.hint > 0 then
-    table.insert(parts, " " .. counts.hint)
+    table.insert(parts, " " .. counts.hint .. space)
   end
 
-  if #parts == 0 then
-    return ""
-  end
-
-  return table.concat(parts, space) .. space
+  return table.concat(parts)
 end
 
 local function format_messages(messages)
