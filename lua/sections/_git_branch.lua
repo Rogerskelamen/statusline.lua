@@ -1,86 +1,159 @@
+local utils = require("modules.utils")
+
 local M = {}
-local git_branch
+
+local uv = vim.uv or vim.loop
+
+-- repo cache
+-- [root] = {
+--   branch = "main",
+--   watcher = uv_fs_event,
+-- }
+local repos = {}
+local icon = ""
 local space = " "
 
--- os specific path separator
-local sep = package.config:sub(1, 1)
+---Return root dir of '.git'
+---@param path? string
+---@return string|nil
+local function get_git_root(path)
+  path = path or vim.api.nvim_buf_get_name(0)
+  if path == "" then
+    return nil
+  end
 
--- returns full path to git directory for current directory
-local function find_git_dir()
-  -- get file dir so we can search from that dir
-  local file_dir = vim.fn.expand("%:p:h") .. ";"
-  -- find .git/ folder genaral case
-  local git_dir = vim.fn.finddir(".git", file_dir)
-  -- find .git file in case of submodules or any other case git dir is in
-  -- any other place than .git/
-  local git_file = vim.fn.findfile(".git", file_dir)
-  -- for some weird reason findfile gives relative path so expand it to fullpath
-  if #git_file > 0 then
-    git_file = vim.fn.fnamemodify(git_file, ":p")
+  local dir = vim.fs.dirname(path)
+  local git_dir = vim.fs.find(".git", {
+    upward = true,
+    path = dir,
+  })[1]
+
+  if not git_dir then
+    return nil
   end
-  if #git_file > #git_dir then
-    -- separate git-dir or submodule is used
-    local file = io.open(git_file)
-    git_dir = file:read()
-    git_dir = git_dir:match("gitdir: (.+)$")
-    file:close()
-    -- submodule / relative file path
-    if git_dir:sub(1, 1) ~= sep and not git_dir:match("^%a:.*$") then
-      git_dir = git_file:match("(.*).git") .. git_dir
-    end
-  end
-  return git_dir
+
+  return vim.fs.dirname(git_dir)
 end
 
--- sets git_branch veriable to branch name or commit hash if not on branch
-local function get_git_head(head_file)
-  local f_head = io.open(head_file)
-  if f_head then
-    local HEAD = f_head:read()
-    f_head:close()
-    local branch = HEAD:match("ref: refs/heads/(.+)$")
-    if branch then
-      git_branch = branch
-    else
-      git_branch = HEAD:sub(1, 6)
+---Get branch name of current project
+---@param root string
+local function fetch_branch(root)
+  vim.system({ "git", "-C", root, "rev-parse", "--abbrev-ref", "HEAD" }, { text = true }, function(obj)
+    if obj.code ~= 0 then
+      return
     end
-  end
-  return nil
-end
 
--- event watcher to watch head file
-local file_changed = vim.loop.new_fs_event()
-local function watch_head()
-  file_changed:stop()
-  local git_dir = find_git_dir()
-  if #git_dir > 0 then
-    local head_file = git_dir .. sep .. "HEAD"
-    get_git_head(head_file)
-    file_changed:start(
-      head_file,
-      {},
-      vim.schedule_wrap(function()
-        -- reset file-watch
-        watch_head()
+    local branch = vim.trim(obj.stdout)
+
+    if branch == "HEAD" then
+      -- detached HEAD fallback
+      vim.system({ "git", "-C", root, "rev-parse", "--short", "HEAD" }, { text = true }, function(detached)
+        if detached.code == 0 then
+          repos[root].branch = vim.trim(detached.stdout)
+        end
       end)
-    )
-  else
-    -- set to nil when git dir was not found
-    git_branch = nil
-  end
+    else
+      repos[root].branch = branch
+    end
+  end)
 end
 
--- returns the git_branch value to be shown on statusline
+---Return 'HEAD' file path
+---@param root string
+---@return string|nil
+local function get_head_path(root)
+  local dotgit = root .. "/.git"
+
+  local stat = uv.fs_stat(dotgit)
+  if not stat then
+    return nil
+  end
+  if stat.type == "directory" then
+    return dotgit .. "/HEAD"
+  end
+
+  -- submodule or worktree (.git is file)
+  local f = io.open(dotgit)
+  if not f then
+    return nil
+  end
+
+  local content = f:read("*l")
+  f:close()
+
+  local gitdir = content:match("gitdir: (.+)")
+  if not gitdir then
+    return nil
+  end
+
+  if not gitdir:match("^%a:[/\\]") then
+    gitdir = root .. "/" .. gitdir
+  end
+
+  return gitdir .. "/HEAD"
+end
+
+---Store repo watch to root table
+---@param root string
+local function watch_repo(root)
+  if repos[root] and repos[root].watcher then
+    return
+  end
+
+  repos[root] = repos[root] or {}
+
+  local function start_watcher()
+    local head_path = get_head_path(root)
+    if not head_path then
+      return
+    end
+
+    local watcher = uv.new_fs_event()
+
+    watcher:start(head_path, {}, function()
+      -- stop and recreate watcher
+      watcher:stop()
+      watcher:close()
+
+      repos[root].watcher = nil
+      fetch_branch(root)
+
+      -- restart watcher
+      vim.schedule(function()
+        watch_repo(root)
+      end)
+    end)
+
+    repos[root].watcher = watcher
+  end
+
+  start_watcher()
+
+  -- initial fetch
+  fetch_branch(root)
+end
+
 function M.branch()
-  if not git_branch or #git_branch == 0 then
+  if not utils.has_version(0, 10) then
     return ""
   end
-  local icon = ""
-  return icon .. space .. git_branch
-end
 
--- run watch head on load so branch is present when component is loaded
-watch_head()
+  local root = get_git_root()
+  if not root then
+    return ""
+  end
+
+  if not repos[root] then
+    watch_repo(root)
+  end
+
+  local branch = repos[root].branch
+  if not branch or branch == "" then
+    return ""
+  end
+
+  return icon .. space .. branch
+end
 
 return M
 

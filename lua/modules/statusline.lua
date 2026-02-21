@@ -145,7 +145,7 @@ function M.active_line()
   -- Component: git commit stats -> REQUIRES SIGNIFY
   stl[#stl + 1] = signify.signify()
 
-  -- Component: git branch name -> requires FUGITIVE
+  -- Component: git branch name
   stl[#stl + 1] = git_branch.branch()
 
   --Component: Lsp Progress
