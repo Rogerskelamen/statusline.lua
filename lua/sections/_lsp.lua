@@ -1,4 +1,8 @@
 local M = {}
+
+local uv = vim.uv or vim.loop
+-- singleton timer
+local redraw_timer = nil
 local space = " "
 
 function M.current_function()
@@ -67,10 +71,30 @@ function M.diagnostics()
   return table.concat(parts)
 end
 
+local function start_statusline_timer()
+  if redraw_timer then
+    return
+  end
+
+  redraw_timer = uv.new_timer()
+
+  redraw_timer:start(
+    0,
+    120,
+    vim.schedule_wrap(function()
+      -- Only redraw when LSP client exits
+      local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
+      if get_clients and #get_clients({ bufnr = 0 }) > 0 then
+        vim.cmd("redrawstatus")
+      end
+    end)
+  )
+end
+
 local function format_messages(messages)
   local result = {}
   local spinners = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
-  local ms = vim.loop.hrtime() / 1000000
+  local ms = uv.hrtime() / 1000000
   local frame = math.floor(ms / 120) % #spinners
   local i = 1
   for _, msg in pairs(messages) do
@@ -80,31 +104,38 @@ local function format_messages(messages)
       i = i + 1
     end
   end
-  return table.concat(result, " ") .. " " .. spinners[frame + 1]
+  return table.concat(result, space) .. space .. spinners[frame + 1]
 end
 
 -- REQUIRES LSP
 function M.lsp_progress()
   local messages = {}
 
-  -- get_progress_messages deprecated in favor of vim.lsp.status
   if vim.lsp.status then
-    local clients = (vim.lsp.get_clients or vim.lsp.get_active_clients)()
+    local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
+    local clients = get_clients({ bufnr = 0 }) or {}
 
-    vim.iter(clients):each(function(c)
-      local msg = c.progress:pop()
-      if msg and msg.value then
-        table.insert(messages, msg.value)
-      end
+    for _, client in ipairs(clients) do
+      local progress = client.progress
+      if progress and type(progress) == "table" then
+        -- pop one piece of new message
+        local msg = progress.pop and progress:pop()
+        if msg and msg.value then
+          table.insert(messages, msg.value)
+        end
 
-      for pmsg in c.progress do
-        if pmsg and pmsg.value then
-          table.insert(messages, pmsg.value)
+        -- traverse current lsp status
+        if progress.__pairs then
+          for pmsg in progress do
+            if pmsg and pmsg.value then
+              table.insert(messages, pmsg.value)
+            end
+          end
         end
       end
-    end)
+    end
   else
-    -- Support for older versions of Neovim
+    -- fallback for nvim < 0.10
     messages = vim.lsp.util.get_progress_messages()
   end
 
@@ -128,5 +159,8 @@ function M.lightbulb()
     return ""
   end
 end
+
+-- Start spinner/statusline auto refresh
+start_statusline_timer()
 
 return M

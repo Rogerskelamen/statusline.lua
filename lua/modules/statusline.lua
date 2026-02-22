@@ -148,13 +148,14 @@ function M.active_line()
   -- Component: git branch name
   stl[#stl + 1] = git_branch.branch()
 
-  --Component: Lsp Progress
-  -- if lsp.lsp_progress()~= nil then
+  -- Component: Lsp Progress
+  -- if lsp.lsp_progress() then
   stl[#stl + 1] = lsp.lsp_progress()
   stl[#stl + 1] = "%#Statusline_LSP_Func# " .. lsp.lightbulb()
-  -- end
 
+  --
   -- RIGHT SIDE INFO
+  --
   -- Alignment to left
   stl[#stl + 1] = "%="
 
