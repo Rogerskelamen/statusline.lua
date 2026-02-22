@@ -134,6 +134,16 @@ local function watch_repo(root)
 end
 
 function M.branch()
+  -- Integrate with gitsigns.nvim
+  if package.loaded["gitsigns"] then
+    local head = vim.b.gitsigns_head
+    if head and head ~= "" then
+      return icon .. space .. head
+    else
+      return ""
+    end
+  end
+
   if not utils.has_version(0, 10) then
     return ""
   end
