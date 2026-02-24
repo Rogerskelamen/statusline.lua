@@ -149,8 +149,9 @@ function M.active_line()
   stl[#stl + 1] = git_branch.branch()
 
   -- Component: Lsp Progress
-  -- if lsp.lsp_progress() then
-  stl[#stl + 1] = lsp.lsp_progress()
+  if not lsp.has_fidget() then
+    stl[#stl + 1] = lsp.lsp_progress()
+  end
   stl[#stl + 1] = "%#Statusline_LSP_Func# " .. lsp.lightbulb()
 
   --

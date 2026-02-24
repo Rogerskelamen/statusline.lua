@@ -5,6 +5,10 @@ local uv = vim.uv or vim.loop
 local redraw_timer = nil
 local space = " "
 
+function M.has_fidget()
+  return package.loaded["fidget"] ~= nil
+end
+
 function M.current_function()
   local lsp_function = vim.b.lsp_current_function
   if lsp_function == nil or lsp_function == "" then
@@ -71,6 +75,14 @@ function M.diagnostics()
   return table.concat(parts)
 end
 
+local function stop_statusline_timer()
+  if redraw_timer then
+    redraw_timer:stop()
+    redraw_timer:close()
+    redraw_timer = nil
+  end
+end
+
 local function start_statusline_timer()
   if redraw_timer then
     return
@@ -82,13 +94,13 @@ local function start_statusline_timer()
     0,
     120,
     vim.schedule_wrap(function()
-      -- Only redraw when LSP client exits
       local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
       if get_clients and #get_clients({ bufnr = 0 }) > 0 then
         vim.cmd("redrawstatus")
+      else
+        stop_statusline_timer()
       end
-    end)
-  )
+    end))
 end
 
 local function format_messages(messages)
@@ -97,7 +109,7 @@ local function format_messages(messages)
   local ms = uv.hrtime() / 1000000
   local frame = math.floor(ms / 120) % #spinners
   local i = 1
-  for _, msg in pairs(messages) do
+  for _, msg in ipairs(messages) do
     -- Only display at most 2 progress messages at a time to avoid clutter
     if i < 3 then
       table.insert(result, (msg.percentage or 0) .. "%% " .. (msg.title or ""))
@@ -118,19 +130,15 @@ function M.lsp_progress()
     for _, client in ipairs(clients) do
       local progress = client.progress
       if progress and type(progress) == "table" then
-        -- pop one piece of new message
-        local msg = progress.pop and progress:pop()
-        if msg and msg.value then
-          table.insert(messages, msg.value)
+        local last
+        for pmsg in progress do
+          if pmsg and pmsg.value then
+            last = pmsg.value
+          end
         end
 
-        -- traverse current lsp status
-        if progress.__pairs then
-          for pmsg in progress do
-            if pmsg and pmsg.value then
-              table.insert(messages, pmsg.value)
-            end
-          end
+        if last then
+          table.insert(messages, last)
         end
       end
     end
@@ -161,6 +169,24 @@ function M.lightbulb()
 end
 
 -- Start spinner/statusline auto refresh
-start_statusline_timer()
+local lsp_group = vim.api.nvim_create_augroup("StatuslineLspGroup", { clear = true })
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = lsp_group,
+  callback = function()
+    if not M.has_fidget() then
+      start_statusline_timer()
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd("LspDetach", {
+  group = lsp_group,
+  callback = function()
+    local get_clients = vim.lsp.get_clients or vim.lsp.get_active_clients
+    if not get_clients or #get_clients() == 0 then
+      stop_statusline_timer()
+    end
+  end,
+})
 
 return M
