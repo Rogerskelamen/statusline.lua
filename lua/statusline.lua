@@ -55,6 +55,7 @@ function M.setup(user_config)
     end,
   })
 
+  -- For the changes of mode indicator
   vim.api.nvim_create_autocmd("ModeChanged", {
     group = stl_group,
     callback = vim.schedule_wrap(function()

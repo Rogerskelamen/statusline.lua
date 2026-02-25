@@ -6,7 +6,8 @@ local redraw_timer = nil
 local space = " "
 
 function M.has_fidget()
-  return package.loaded["fidget"] ~= nil
+  local ok, _ = pcall(require, "fidget")
+  return ok
 end
 
 function M.current_function()
@@ -174,9 +175,10 @@ local lsp_group = vim.api.nvim_create_augroup("StatuslineLspGroup", { clear = tr
 vim.api.nvim_create_autocmd("LspAttach", {
   group = lsp_group,
   callback = function()
-    if not M.has_fidget() then
-      start_statusline_timer()
+    if M.has_fidget() then
+      return
     end
+    start_statusline_timer()
   end,
 })
 

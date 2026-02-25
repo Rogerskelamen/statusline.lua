@@ -1,3 +1,5 @@
+local config = require("modules.config")
+
 local M = {}
 
 M.symbols_cache = {}
@@ -102,20 +104,26 @@ local function update_current_function(bufnr)
   end
 end
 
-vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(args)
-    fetch_symbols(args.buf)
-  end,
-})
+-- Setup
+if config.get().function_tip then
+  local group = vim.api.nvim_create_augroup("StatuslineLspFunction", { clear = true })
+  vim.api.nvim_create_autocmd("LspAttach", {
+    group = group,
+    callback = function(args)
+      fetch_symbols(args.buf)
+    end,
+  })
 
-vim.api.nvim_create_autocmd("CursorMoved", {
-  callback = function()
-    local bufnr = vim.api.nvim_get_current_buf()
-    if vim.bo.buftype ~= "" then
-      return
-    end
-    update_current_function(bufnr)
-  end,
-})
+  vim.api.nvim_create_autocmd("CursorMoved", {
+    group = group,
+    callback = function()
+      local bufnr = vim.api.nvim_get_current_buf()
+      if vim.bo.buftype ~= "" then
+        return
+      end
+      update_current_function(bufnr)
+    end,
+  })
+end
 
 return M
