@@ -6,6 +6,7 @@ local editable = require("sections._bufeditable")
 local filesize = require("sections._filesize")
 local git_branch = require("sections._git_branch")
 local lsp = require("sections._lsp")
+local lsp_function = require("sections._lsp_function")
 local modes = require("tables._modes")
 local signify = require("sections._signify")
 local utils = require("modules.utils")
@@ -161,7 +162,7 @@ function M.active_line()
   stl[#stl + 1] = "%="
 
   -- Component: LSP CURRENT FUCTION --> Requires LSP
-  stl[#stl + 1] = "%#Statusline_LSP_Func# " .. lsp.current_function()
+  stl[#stl + 1] = "%#Statusline_LSP_Func# " .. lsp_function.current_function
 
   -- Scrollbar
   -- stl[#stl + 1] = "%#StatusLine#" .. vim.call('Scrollbar') .. space
