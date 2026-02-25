@@ -5,11 +5,13 @@ local M = {}
 ---@field tabline boolean
 ---@field lsp_diagnostics boolean
 ---@field ale_diagnostics boolean
+---@field function_tip boolean
 local defaults = {
   match_colorscheme = false,
   tabline = true,
   lsp_diagnostics = true,
   ale_diagnostics = false,
+  function_tip = false,
 }
 
 ---@type StatuslineConfig

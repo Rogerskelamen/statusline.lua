@@ -100,7 +100,8 @@ local function start_statusline_timer()
       else
         stop_statusline_timer()
       end
-    end))
+    end)
+  )
 end
 
 local function format_messages(messages)
