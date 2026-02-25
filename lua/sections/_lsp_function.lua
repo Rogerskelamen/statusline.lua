@@ -1,17 +1,29 @@
 local M = {}
 
-M.current_function = ""
-M.symbols_cache = nil
+M.symbols_cache = {}
+M.current_function = {}
 
----@param bufnr? integer
-local function fetch_symbols(bufnr)
-  bufnr = bufnr or 0
+function M.get_current_function()
+  local bufnr = vim.api.nvim_get_current_buf()
+  return M.current_function[bufnr] or ""
+end
 
-  -- Check current buffer has lsp capability
+---Check current buffer has lsp documentSymbol capability
+---@param bufnr integer
+---@return boolean
+local function supports_document_symbol(bufnr)
   for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-    if not client.server_capabilities.documentSymbolProvider then
-      return
+    if client.server_capabilities.documentSymbolProvider then
+      return true
     end
+  end
+  return false
+end
+
+---@param bufnr integer
+local function fetch_symbols(bufnr)
+  if not supports_document_symbol(bufnr) then
+    return
   end
 
   vim.lsp.buf_request(bufnr, "textDocument/documentSymbol", {
@@ -21,7 +33,7 @@ local function fetch_symbols(bufnr)
       return
     end
 
-    M.symbols_cache = result
+    M.symbols_cache[bufnr] = result
   end)
 end
 
@@ -66,8 +78,9 @@ local function find_symbol(symbols, row, col)
   end
 end
 
-local function update_current_function()
-  if not M.symbols_cache then
+local function update_current_function(bufnr)
+  local symbols = M.symbols_cache[bufnr]
+  if not symbols then
     return
   end
 
@@ -75,21 +88,33 @@ local function update_current_function()
   local row = pos[1] - 1
   local col = pos[2]
 
-  local symbol = find_symbol(M.symbols_cache, row, col)
+  local symbol = find_symbol(symbols, row, col)
 
-  if symbol and symbol.kind == 12 then -- 12 = Function
-    M.current_function = "󰊕 " .. symbol.name .. " "
-  else
-    M.current_function = ""
+  local new_value = ""
+
+  if symbol and (symbol.kind == 6 or symbol.kind == 12 or symbol.kind == 9) then
+    new_value = "󰊕 " .. symbol.name .. " "
   end
 
-  vim.cmd("redrawstatus")
+  if new_value ~= M.current_function[bufnr] then
+    M.current_function[bufnr] = new_value
+    vim.cmd("redrawstatus")
+  end
 end
 
-vim.api.nvim_create_autocmd({ "CursorHold", "BufEnter" }, {
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    fetch_symbols(args.buf)
+  end,
+})
+
+vim.api.nvim_create_autocmd("CursorMoved", {
   callback = function()
-    fetch_symbols()
-    update_current_function()
+    local bufnr = vim.api.nvim_get_current_buf()
+    if vim.bo.buftype ~= "" then
+      return
+    end
+    update_current_function(bufnr)
   end,
 })
 

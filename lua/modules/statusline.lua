@@ -163,7 +163,7 @@ function M.active_line()
 
   -- Component: LSP CURRENT FUCTION --> Requires LSP
   if config.function_tip then
-    stl[#stl + 1] = "%#Statusline_LSP_Func# " .. lsp_function.current_function
+    stl[#stl + 1] = "%#Statusline_LSP_Func# " .. lsp_function.get_current_function()
   end
 
   -- Scrollbar
