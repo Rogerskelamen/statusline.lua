@@ -162,7 +162,7 @@ function M.lightbulb()
   end
 
   if lightbulb.get_status_text() ~= "" then
-    return "" .. space
+    return "󰌵" .. space
   else
     return ""
   end
