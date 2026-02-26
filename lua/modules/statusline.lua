@@ -8,6 +8,7 @@ local git_branch = require("sections._git_branch")
 local lsp = require("sections._lsp")
 local lsp_function = require("sections._lsp_function")
 local modes = require("tables._modes")
+local scrollbar = require("sections._scrollbar")
 local signify = require("sections._signify")
 local utils = require("modules.utils")
 
@@ -153,7 +154,9 @@ function M.active_line()
   if not package.loaded["fidget"] then
     stl[#stl + 1] = lsp.lsp_progress()
   end
-  stl[#stl + 1] = "%#Statusline_LSP_Func# " .. lsp.lightbulb()
+  if package.loaded["lightbulb"] then
+    stl[#stl + 1] = "%#Statusline_LSP_Func# " .. lsp.lightbulb()
+  end
 
   --
   -- RIGHT SIDE INFO
@@ -166,11 +169,14 @@ function M.active_line()
     stl[#stl + 1] = "%#Statusline_LSP_Func# " .. lsp_function.get_current_function()
   end
 
+  -- Reset highlight
+  stl[#stl + 1] = "%#StatusLine#"
+
   -- Scrollbar
-  -- stl[#stl + 1] = "%#StatusLine#" .. vim.call('Scrollbar') .. space
+  stl[#stl + 1] = scrollbar.get() .. space
 
   -- Component: Modified, Read-Only, Filesize, Row/Col
-  stl[#stl + 1] = "%#StatusLine#" .. bufmod.is_buffer_modified()
+  stl[#stl + 1] = bufmod.is_buffer_modified()
   stl[#stl + 1] = editable.editable()
   stl[#stl + 1] = filesize.get_file_size()
   stl[#stl + 1] = [[ʟ %l/%L c %c]] .. space
