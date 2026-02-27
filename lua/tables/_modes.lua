@@ -1,6 +1,6 @@
 local M = {}
 
----use 'h: mode()' to have a view of all possible modes
+---use ':h mode()' to have a view of all possible modes
 ---@type table<string, string>
 local mode_map = {
   n = "N",

@@ -6,12 +6,14 @@ local M = {}
 ---@field lsp_diagnostics boolean
 ---@field ale_diagnostics boolean
 ---@field function_tip boolean
+---@field scrollbar boolean
 local defaults = {
   match_colorscheme = false,
   tabline = true,
   lsp_diagnostics = true,
   ale_diagnostics = false,
   function_tip = false,
+  scrollbar = false,
 }
 
 ---@type StatuslineConfig

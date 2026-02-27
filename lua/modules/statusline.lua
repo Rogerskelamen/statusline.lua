@@ -172,11 +172,15 @@ function M.active_line()
   -- Reset highlight
   stl[#stl + 1] = "%#StatusLine#"
 
-  -- Scrollbar
-  stl[#stl + 1] = scrollbar.get() .. space
-
-  -- Component: Modified, Read-Only, Filesize, Row/Col
+  -- Component: Modified
   stl[#stl + 1] = bufmod.is_buffer_modified()
+
+  -- Scrollbar
+  if config.scrollbar then
+    stl[#stl + 1] = scrollbar.get() .. space
+  end
+
+  -- Component: Read-Only, Filesize, Row/Col
   stl[#stl + 1] = editable.editable()
   stl[#stl + 1] = filesize.get_file_size()
   stl[#stl + 1] = [[ʟ %l/%L c %c]] .. space
