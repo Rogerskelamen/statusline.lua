@@ -1,30 +1,56 @@
-local M = {}
-local vim = vim
 local space = " "
+local uv = vim.uv or vim.loop
 
-local function file_size(file)
-  local size = vim.fn.getfsize(file)
-  if size == 0 or size == -1 or size == -2 then
+local M = {}
+
+local units = { "B", "KB", "MB", "GB", "TB" }
+
+---Return stardard file size with human units
+---@param bytes integer
+---@return string
+local function human_size(bytes)
+  if not bytes or bytes <= 0 then
     return ""
   end
-  if size < 1024 then
-    size = size .. "B"
-  elseif size < 1024 * 1024 then
-    size = string.format("%d", size / 1024) .. "KB"
-  elseif size < 1024 * 1024 * 1024 then
-    size = string.format("%d", size / 1024 / 1024) .. "MB"
-  else
-    size = string.format("%d", size / 1024 / 1024 / 1024) .. "GB"
+
+  local i = 1
+  while bytes >= 1024 and i < #units do
+    bytes = bytes / 1024
+    i = i + 1
   end
-  return size .. space
+
+  if i == 1 then
+    -- B: no decimal
+    return string.format("%d%s", bytes, units[i])
+  else
+    -- >= KB: leave one decimal number
+    return string.format("%d%s", bytes, units[i])
+  end
 end
 
-function M.get_file_size()
-  local file = vim.fn.expand("%:p")
-  if string.len(file) == 0 then
+---Get file size of current buffer
+---@param bufnr? integer
+---@return string
+function M.get_file_size(bufnr)
+  bufnr = bufnr or 0
+
+  -- special buffer
+  local bo = vim.bo[bufnr]
+  if bo.buftype ~= "" then
     return ""
   end
-  return file_size(file)
+
+  local name = vim.api.nvim_buf_get_name(bufnr)
+  if name == "" then
+    return ""
+  end
+
+  local stat = uv.fs_stat(name)
+  if not stat or not stat.size then
+    return ""
+  end
+
+  return human_size(stat.size) .. space
 end
 
 return M
