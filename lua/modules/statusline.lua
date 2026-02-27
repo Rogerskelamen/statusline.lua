@@ -173,7 +173,7 @@ function M.active_line()
   stl[#stl + 1] = "%#StatusLine#"
 
   -- Component: Modified
-  stl[#stl + 1] = bufmod.is_buffer_modified()
+  stl[#stl + 1] = bufmod.buffer_modified()
 
   -- Scrollbar
   if config.scrollbar then
