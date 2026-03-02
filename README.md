@@ -1,12 +1,12 @@
-This is the fork version of [beauwilliams' statusline](https://github.com/beauwilliams/statusline.lua).
+This is a fork and fully refactored version of [beauwilliams' statusline](https://github.com/beauwilliams/statusline.lua).
 
-I made a few small modifications while keeping the original beautiful design remained:
+I made a lot of modifications while keeping the original beautiful design remained:
 
 - Windows OS compatible
 
 - Proper display in terminal mode
 
-- A modern Lua coding style and a modern build for statusline
+- A modern Lua rebuild and a modern build for statusline
 
 - A better format style for [stylua](https://github.com/JohnnyMorganz/StyLua)
 
@@ -19,6 +19,8 @@ Buffer recognition:
 - [nvim-tree.lua](https://github.com/nvim-tree/nvim-tree.lua)
 
 - [outline.nvim](https://github.com/hedyhli/outline.nvim)
+
+- [Telescope](https://github.com/nvim-telescope/telescope.nvim)
 
 ---
 
