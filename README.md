@@ -6,7 +6,7 @@ I made a lot of modifications while keeping the original beautiful design remain
 
 - Proper display in terminal mode
 
-- A modern Lua rebuild and a modern build for statusline
+- A modern Lua rebuild
 
 - A better format style for [stylua](https://github.com/JohnnyMorganz/StyLua)
 

@@ -22,6 +22,7 @@ local M = {}
 
 ---@type boolean
 local use_tabline = true
+local global_line = false
 
 ---Setup highlights for statusline and tabline
 local function setup_hl()
@@ -37,10 +38,15 @@ end
 ---@param user_config StatuslineConfig
 function M.setup(user_config)
   config.setup(user_config)
-  use_tabline = config.get().tabline
+  local cfg = config.get()
+  use_tabline = cfg.tabline
+  global_line = cfg.global
 
   -- Disable line numbers in bottom right for our custom indicator as above
   vim.o.ruler = false
+  if global_line then
+    vim.o.laststatus = 3
+  end
 
   -- Set highlights
   setup_hl()
@@ -67,7 +73,11 @@ function M.setup(user_config)
   function _G.__statusline_render()
     return require("modules.statusline").render()
   end
-  vim.o.statusline = "%!v:lua.__statusline_render()"
+  if global_line then
+    vim.o.statusline = "%{%v:lua.__statusline_render()%}"
+  else
+    vim.o.statusline = "%!v:lua.__statusline_render()"
+  end
 
   -- Tabline render
   if use_tabline then

@@ -23,8 +23,8 @@ local space = " "
 
 -- Main Render function
 function M.render()
-  local winid = vim.g.statusline_winid
-  local bufnr = vim.api.nvim_win_get_buf(winid)
+  local winid = vim.g.statusline_winid or vim.api.nvim_get_current_win()
+  local bufnr = winid and vim.api.nvim_win_get_buf(winid)
   local bt = vim.bo[bufnr].buftype
 
   if bt ~= "" and bt ~= "terminal" then

@@ -1,6 +1,7 @@
 local M = {}
 
 ---@class StatuslineConfig
+---@field global boolean
 ---@field match_colorscheme boolean
 ---@field tabline boolean
 ---@field lsp_diagnostics boolean
@@ -8,6 +9,7 @@ local M = {}
 ---@field function_tip boolean
 ---@field scrollbar boolean
 local defaults = {
+  global = false,
   match_colorscheme = false,
   tabline = true,
   lsp_diagnostics = true,
