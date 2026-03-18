@@ -131,14 +131,12 @@ function M.active_line()
   stl[#stl + 1] = "%#StatusLine#" .. bufname.get_buffer_name()
   stl[#stl + 1] = buficon.get_file_icon()
 
-  -- Component: errors and warnings -> requires ALE
-  if config.ale_diagnostics then
-    stl[#stl + 1] = ale.diagnostics()
-  end
-
   -- Component: Native Nvim LSP Diagnostic
-  if config.lsp_diagnostics then
+  if config.diagnostics == "lsp" then
     stl[#stl + 1] = lsp.diagnostics()
+  -- Component: errors and warnings -> requires ALE
+  elseif config.diagnostics == "ale" then
+    stl[#stl + 1] = ale.diagnostics()
   end
 
   -- TODO: SUPPORT COC LATER, NEEDS TESTING WITH COC USERS FIRST

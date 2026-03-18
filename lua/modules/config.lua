@@ -4,16 +4,16 @@ local M = {}
 ---@field global boolean
 ---@field match_colorscheme boolean
 ---@field tabline boolean
----@field lsp_diagnostics boolean
----@field ale_diagnostics boolean
+---@field diagnostics "lsp" | "ale"
 ---@field function_tip boolean
 ---@field scrollbar boolean
+
+---@type StatuslineConfig
 local defaults = {
   global = false,
   match_colorscheme = false,
   tabline = true,
-  lsp_diagnostics = true,
-  ale_diagnostics = false,
+  diagnostics = "lsp",
   function_tip = false,
   scrollbar = false,
 }
