@@ -27,7 +27,7 @@ function M.render()
   local bufnr = winid and vim.api.nvim_win_get_buf(winid)
   local bt = vim.bo[bufnr].buftype
 
-  if bt ~= "" and bt ~= "terminal" then
+  if bt ~= "" and bt ~= "terminal" and bt ~= "help" then
     return M.simple_line(bufnr)
   end
 
